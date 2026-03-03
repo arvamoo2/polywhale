@@ -30,6 +30,8 @@ import {
   Trophy,
   FlaskConical,
   Tv,
+  Globe,
+  Cpu,
 } from "lucide-react";
 
 /* ─── palette ─── */
@@ -654,12 +656,14 @@ function HeroSection(): React.JSX.Element {
     { label: "Business",    icon: <TrendingUp size={15} /> },
     { label: "Science",     icon: <FlaskConical size={15} /> },
     { label: "Pop Culture", icon: <Tv size={15} /> },
+    { label: "Macro",       icon: <Globe size={15} /> },
+    { label: "Tech",        icon: <Cpu size={15} /> },
   ];
 
   const risks = [
-    { label: "Conservative", color: COLORS.accent,     desc: "Low exposure, high selectivity",     glow: "rgba(0,229,204,0.15)"   },
-    { label: "Balanced",     color: COLORS.accentAlt,  desc: "Optimized risk-reward ratio",        glow: "rgba(124,92,252,0.15)"  },
-    { label: "Degen",        color: COLORS.accentPink, desc: "Maximum alpha, higher volatility",   glow: "rgba(244,114,182,0.15)" },
+    { label: "Conservative", color: "#00e5cc", glow: "rgba(0,229,204,0.15)",    desc: "Low exposure, high selectivity"   },
+    { label: "Balanced",     color: "#7c5cfc", glow: "rgba(124,92,252,0.15)",   desc: "Optimized risk-reward ratio"      },
+    { label: "Degen",        color: "#ff3b3b", glow: "rgba(255,59,59,0.15)",    desc: "Maximum alpha, higher volatility" },
   ];
 
   /* Derived fill % for the slider track */
