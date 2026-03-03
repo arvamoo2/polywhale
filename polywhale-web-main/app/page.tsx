@@ -221,12 +221,12 @@ function Header({
   // ── Exact nav links as specified ──
   const navLinks = ["The Bot", "Whales", "Pricing", "How It Works"];
 
-  const getLinkHref = (label: string): string => {
+ const getLinkHref = (label: string): string => {
     if (label === "The Bot")      return "/the-bot";
-    if (label === "Whales")       return "/whales";
-    if (label === "Pricing")      return "/pricing";
-    if (label === "How It Works") return "/how-it-works"; // absolute routing fix
-    return "#";
+    if (label === "Whales") return "/whales";
+    if (label === "Pricing") return "/pricing";
+    if (label === "How It Works") return "/how-it-works";
+    return `#${label.toLowerCase().replace(/ /g, "-")}`;
   };
 
   const socialsLinks = [
