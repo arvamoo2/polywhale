@@ -25,6 +25,11 @@ import {
   ShieldAlert,
   Crown,
   ExternalLink,
+  Landmark,
+  Coins,
+  Trophy,
+  FlaskConical,
+  Tv,
 } from "lucide-react";
 
 /* ─── palette ─── */
@@ -193,6 +198,43 @@ function GlobalStyles(): React.JSX.Element {
       }
       @media(max-width:768px){
         .footer-grid{grid-template-columns:1fr 1fr!important}
+      }
+
+      /* ─── Range slider ─── */
+      .pw-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        outline: none;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+      }
+      .pw-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #060b18;
+        box-shadow: 0 0 0 2px rgba(0,229,204,0.4), 0 0 16px rgba(0,229,204,0.5);
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+      }
+      .pw-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #060b18;
+        box-shadow: 0 0 0 2px rgba(0,229,204,0.4), 0 0 16px rgba(0,229,204,0.5);
+        cursor: pointer;
+      }
+      .pw-slider::-webkit-slider-thumb:hover {
+        box-shadow: 0 0 0 3px rgba(0,229,204,0.5), 0 0 24px rgba(0,229,204,0.7);
       }
     `}</style>
   );
@@ -596,19 +638,343 @@ function SectionLabel({ num, text, color }: { num: string; text: string; color: 
    Interactive Terminal Dashboard
    ═══════════════════════════════════════ */
 function HeroSection(): React.JSX.Element {
-  const [posSize, setPosSize] = useState(500);
-  const [categories, setCategories] = useState<Record<string, boolean>>({
-    Politics: true, Crypto: true, Sports: false, "Pop Culture": false,
-  });
+  const [maxSize, setMaxSize] = useState(2700);
+  const [selectedCats, setSelectedCats] = useState<string[]>(["Politics", "Crypto"]);
   const [riskProfile, setRiskProfile] = useState("Balanced");
 
-  const toggleCat = (cat: string) => setCategories((p) => ({ ...p, [cat]: !p[cat] }));
+  const toggleCat = (cat: string) =>
+    setSelectedCats((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    );
+
+  const categories = [
+    { label: "Politics",    icon: <Landmark size={15} /> },
+    { label: "Crypto",      icon: <Coins size={15} /> },
+    { label: "Sports",      icon: <Trophy size={15} /> },
+    { label: "Business",    icon: <TrendingUp size={15} /> },
+    { label: "Science",     icon: <FlaskConical size={15} /> },
+    { label: "Pop Culture", icon: <Tv size={15} /> },
+  ];
 
   const risks = [
-    { label: "Conservative", color: COLORS.accent, desc: "Low exposure, high selectivity" },
-    { label: "Balanced", color: COLORS.accentAlt, desc: "Optimized risk-reward ratio" },
-    { label: "Degen", color: COLORS.accentPink, desc: "Maximum alpha, higher volatility" },
+    { label: "Conservative", color: COLORS.accent,     desc: "Low exposure, high selectivity",     glow: "rgba(0,229,204,0.15)"   },
+    { label: "Balanced",     color: COLORS.accentAlt,  desc: "Optimized risk-reward ratio",        glow: "rgba(124,92,252,0.15)"  },
+    { label: "Degen",        color: COLORS.accentPink, desc: "Maximum alpha, higher volatility",   glow: "rgba(244,114,182,0.15)" },
   ];
+
+  /* Derived fill % for the slider track */
+  const fillPct = ((maxSize - 0) / (5000 - 0)) * 100;
+
+  return (
+    <section style={{ padding: "160px 24px 120px", position: "relative", overflow: "hidden" }}>
+      {/* Subtle background orbs */}
+      <div style={{
+        position: "absolute", top: "15%", left: "50%", width: 800, height: 800,
+        marginLeft: -400, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(0,229,204,0.06), transparent 65%)",
+        filter: "blur(80px)", pointerEvents: "none",
+        animation: "orb-float-a 22s ease-in-out infinite",
+      }} />
+      <div style={{
+        position: "absolute", top: "40%", left: "25%", width: 600, height: 600,
+        marginLeft: -300, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(124,92,252,0.05), transparent 65%)",
+        filter: "blur(60px)", pointerEvents: "none",
+        animation: "orb-float-b 26s ease-in-out infinite",
+      }} />
+
+      <div style={{ maxWidth: 1060, margin: "0 auto", position: "relative" }}>
+        {/* Badge */}
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "7px 16px", borderRadius: 100,
+            background: "rgba(0,229,204,0.05)", border: "1px solid rgba(0,229,204,0.1)",
+            fontSize: 12, color: COLORS.accent, fontWeight: 600,
+            animation: "fade-in-up 0.5s ease both",
+          }}>
+            <Terminal size={13} /> The Command Center
+          </div>
+        </div>
+
+        {/* Heading */}
+        <h1
+          className="font-display"
+          style={{
+            fontSize: "clamp(34px, 5.5vw, 62px)",
+            fontWeight: 800,
+            color: "#fff",
+            letterSpacing: "-0.035em",
+            lineHeight: 1.06,
+            textAlign: "center",
+            marginBottom: 20,
+            animation: "fade-in-up 0.5s ease 0.05s both",
+          }}
+        >
+          Algorithmic Precision,<br />
+          <span
+            style={{
+              background: "linear-gradient(135deg, #00e5cc, #7c5cfc)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Complete User Control.
+          </span>
+        </h1>
+
+        <p style={{
+          fontSize: 17, color: COLORS.textSecondary, lineHeight: 1.8,
+          maxWidth: 540, margin: "0 auto 64px", textAlign: "center",
+          animation: "fade-in-up 0.5s ease 0.1s both",
+        }}>
+          Configure every parameter. Set your risk tolerance, choose your markets,
+          and let the algorithm execute with institutional precision.
+        </p>
+
+        {/* ─── Terminal Configuration Dashboard ─── */}
+        <div
+          style={{
+            borderRadius: 20,
+            overflow: "hidden",
+            background: "linear-gradient(160deg, rgba(8,14,32,0.95), rgba(4,8,20,0.98))",
+            border: "1px solid rgba(0,229,204,0.08)",
+            boxShadow: "0 48px 120px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,229,204,0.04), inset 0 1px 0 rgba(255,255,255,0.03)",
+            animation: "fade-in-up 0.6s ease 0.15s both",
+          }}
+        >
+          {/* ─ Window chrome ─ */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 24px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              background: "rgba(0,0,0,0.2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+            </div>
+            <span className="font-mono" style={{ fontSize: 11, color: COLORS.textSecondary, letterSpacing: "0.08em" }}>
+              POLYWHALE &mdash; BOT CONFIGURATION
+            </span>
+            <Settings size={14} color={COLORS.textSecondary} />
+          </div>
+
+          {/* ─ Dashboard body: 2-column split ─ */}
+          <div
+            className="dash-halves"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 1,
+              background: "rgba(255,255,255,0.02)",
+            }}
+          >
+            {/* ══ LEFT PANEL: Slider + Categories ══ */}
+            <div style={{ padding: "32px 30px", background: "rgba(6,10,24,0.6)" }}>
+
+              {/* ─ Max Position Size Slider ─ */}
+              <div style={{ marginBottom: 36 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 }}>
+                  <span className="font-mono" style={{ fontSize: 10, color: COLORS.textSecondary, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    Max Position Size
+                  </span>
+                  <span className="font-mono" style={{ fontSize: 18, color: COLORS.accent, fontWeight: 700, letterSpacing: "-0.02em" }}>
+                    ${maxSize.toLocaleString()}
+                    <span style={{ fontSize: 10, color: COLORS.textSecondary, fontWeight: 500, marginLeft: 4 }}>USDC</span>
+                  </span>
+                </div>
+
+                {/* Native range input with CSS gradient track */}
+                <div style={{ position: "relative", paddingBottom: 2 }}>
+                  <input
+                    type="range"
+                    className="pw-slider"
+                    min={0}
+                    max={5000}
+                    step={50}
+                    value={maxSize}
+                    onChange={(e) => setMaxSize(Number(e.target.value))}
+                    style={{
+                      background: `linear-gradient(90deg, #00e5cc ${fillPct}%, #7c5cfc ${fillPct}%, rgba(255,255,255,0.04) ${fillPct}%)`,
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+                  <span className="font-mono" style={{ fontSize: 9, color: "rgba(255,255,255,0.15)" }}>$0</span>
+                  <span className="font-mono" style={{ fontSize: 9, color: "rgba(255,255,255,0.15)" }}>$5,000</span>
+                </div>
+              </div>
+
+              {/* ─ Market Categories Toggle Grid ─ */}
+              <span className="font-mono" style={{
+                fontSize: 10, color: COLORS.textSecondary,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                display: "block", marginBottom: 14,
+              }}>
+                Market Categories
+              </span>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
+                {categories.map(({ label, icon }) => {
+                  const active = selectedCats.includes(label);
+                  return (
+                    <button
+                      key={label}
+                      onClick={() => toggleCat(label)}
+                      style={{
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        border: `1px solid ${active ? "rgba(0,229,204,0.28)" : "rgba(255,255,255,0.05)"}`,
+                        background: active ? "rgba(0,229,204,0.10)" : "rgba(255,255,255,0.015)",
+                        color: active ? COLORS.accent : COLORS.textSecondary,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        transition: "all 0.2s ease",
+                        boxShadow: active ? "0 0 16px rgba(0,229,204,0.08), inset 0 1px 0 rgba(0,229,204,0.06)" : "none",
+                        filter: active ? "drop-shadow(0 0 6px rgba(0,229,204,0.25))" : "none",
+                      }}
+                    >
+                      <span style={{
+                        display: "flex",
+                        color: active ? COLORS.accent : "rgba(255,255,255,0.2)",
+                        transition: "color 0.2s",
+                        flexShrink: 0,
+                      }}>
+                        {icon}
+                      </span>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ══ RIGHT PANEL: Risk Profile ══ */}
+            <div style={{ padding: "32px 30px", background: "rgba(6,10,24,0.6)" }}>
+              <span className="font-mono" style={{
+                fontSize: 10, color: COLORS.textSecondary,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                display: "block", marginBottom: 16,
+              }}>
+                Risk Profile
+              </span>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {risks.map((rp) => {
+                  const active = riskProfile === rp.label;
+                  return (
+                    <button
+                      key={rp.label}
+                      onClick={() => setRiskProfile(rp.label)}
+                      style={{
+                        padding: "18px 20px",
+                        borderRadius: 14,
+                        cursor: "pointer",
+                        border: `1px solid ${active ? `${rp.color}45` : "rgba(255,255,255,0.03)"}`,
+                        background: active ? `${rp.color}0f` : "rgba(255,255,255,0.01)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        transition: "all 0.25s cubic-bezier(0.16,1,0.3,1)",
+                        fontFamily: "'DM Sans', sans-serif",
+                        transform: active ? "translateX(4px)" : "translateX(0)",
+                        boxShadow: active
+                          ? `0 0 28px ${rp.glow}, inset 0 1px 0 rgba(255,255,255,0.04)`
+                          : "none",
+                      }}
+                    >
+                      {/* Radio dot */}
+                      <div style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        border: `2px solid ${active ? rp.color : "rgba(255,255,255,0.1)"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s",
+                        flexShrink: 0,
+                        boxShadow: active ? `0 0 12px ${rp.color}50` : "none",
+                      }}>
+                        {active && (
+                          <div style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            background: rp.color,
+                            boxShadow: `0 0 10px ${rp.color}80`,
+                          }} />
+                        )}
+                      </div>
+
+                      {/* Labels */}
+                      <div style={{ textAlign: "left", flex: 1 }}>
+                        <div style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          color: active ? "#fff" : COLORS.textSecondary,
+                          marginBottom: 3,
+                          letterSpacing: "-0.01em",
+                        }}>
+                          {rp.label}
+                        </div>
+                        <div style={{
+                          fontSize: 11,
+                          color: active ? rp.color : "rgba(255,255,255,0.18)",
+                          transition: "color 0.2s",
+                        }}>
+                          {rp.desc}
+                        </div>
+                      </div>
+
+                      {/* Active accent bar on right */}
+                      {active && (
+                        <div style={{
+                          width: 3,
+                          height: 32,
+                          borderRadius: 2,
+                          background: `linear-gradient(180deg, ${rp.color}, ${rp.color}40)`,
+                          boxShadow: `0 0 10px ${rp.color}50`,
+                          flexShrink: 0,
+                        }} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Bot status bar */}
+              <div style={{
+                marginTop: 28, padding: "14px 18px", borderRadius: 12,
+                background: "rgba(0,229,204,0.03)", border: "1px solid rgba(0,229,204,0.08)",
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <div style={{
+                  width: 8, height: 8, borderRadius: "50%", background: COLORS.accent,
+                  boxShadow: `0 0 10px ${COLORS.accent}50`,
+                  animation: "live-dot 2s ease-in-out infinite",
+                }} />
+                <span className="font-mono" style={{ fontSize: 10, color: COLORS.accent, fontWeight: 600, letterSpacing: "0.04em" }}>
+                  BOT STATUS: ACTIVE &mdash; MONITORING 1,247 WALLETS
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
   return (
     <section style={{ padding: "160px 24px 120px", position: "relative", overflow: "hidden" }}>
