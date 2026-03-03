@@ -298,9 +298,12 @@ function Header({
             <a
               key={l}
               href={getLinkHref(l)}
-              style={linkStyle}
+              style={{
+                ...linkStyle,
+                color: l === "Whales" ? COLORS.accent : "#e2e8f0",
+              }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = COLORS.accent)}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#e2e8f0")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = l === "Whales" ? COLORS.accent : "#e2e8f0")}
             >
               {l}
             </a>
@@ -464,7 +467,7 @@ function Header({
               href={getLinkHref(l)}
               onClick={() => setMobileOpen(false)}
               style={{
-                color: "#e2e8f0",
+                color: l === "Whales" ? COLORS.accent : "#e2e8f0",
                 textDecoration: "none",
                 fontSize: 15,
                 fontWeight: 700,
