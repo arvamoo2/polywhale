@@ -300,13 +300,14 @@ function Header({
   }, []);
 
   const getLinkHref = (label: string): string => {
-    if (label === "Home") return "/";
+    if (label === "The Bot") return "/the-bot";
     if (label === "Whales") return "/whales";
     if (label === "Pricing") return "/pricing";
-    return `#${label.toLowerCase().replace(/ /g, "-")}`;
+    if (label === "How It Works") return "/how-it-works";
+    return "/";
   };
 
-  const navLinks = ["Home", "The Bot", "Whales", "Pricing", "How It Works", "Socials"];
+  const navLinks = ["The Bot", "Whales", "Pricing", "How It Works"];
 
   return (
     <header
