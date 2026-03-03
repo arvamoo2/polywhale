@@ -22,6 +22,9 @@ import {
   Cpu,
   Users,
   TrendingUp,
+  Activity,
+  Server,
+  Lock,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────
@@ -863,11 +866,197 @@ function Hero() {
 }
 
 /* ─────────────────────────────────────────
-   SECTION 1 — Latency Terminal — untouched
+   METRIC GRID — three-stat glass row
+───────────────────────────────────────── */
+function MetricGrid() {
+  const [hovIdx, setHovIdx] = useState<number | null>(null);
+
+  const metrics = [
+    { v:"14.2ms", l:"Avg. Execution",   Icon:Zap,      color:C.accent    },
+    { v:"<2ms",   l:"Signal Ingestion",  Icon:Activity,  color:C.accentAlt },
+    { v:"99.98%", l:"Engine Uptime",     Icon:Server,    color:"#4ade80"   },
+  ];
+
+  return (
+    <div style={{
+      display:"flex", borderRadius:14, overflow:"hidden",
+      border:"1px solid rgba(255,255,255,0.06)",
+      background:C.bgDeep,
+      boxShadow:"inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 48px rgba(0,0,0,0.4)",
+    }}>
+      {metrics.map((m, i) => (
+        <div
+          key={i}
+          onMouseEnter={() => setHovIdx(i)}
+          onMouseLeave={() => setHovIdx(null)}
+          style={{
+            flex:1, padding:"20px 12px", textAlign:"center",
+            borderRight: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none",
+            background: hovIdx === i ? `${m.color}09` : "transparent",
+            transition:"background 0.2s",
+            cursor:"default",
+          }}
+        >
+          <div style={{
+            display:"flex", alignItems:"center", justifyContent:"center",
+            gap:6, marginBottom:8,
+          }}>
+            <m.Icon
+              size={12}
+              color={m.color}
+              style={{ opacity: hovIdx === i ? 1 : 0.45, transition:"opacity 0.2s" }}
+            />
+            <div className="font-mono" style={{
+              fontSize:22, fontWeight:700, color:m.color,
+              letterSpacing:"-0.03em",
+              textShadow: hovIdx === i ? `0 0 24px ${m.color}90` : "none",
+              transition:"text-shadow 0.22s",
+            }}>{m.v}</div>
+          </div>
+          <div style={{
+            fontSize:10, letterSpacing:"0.05em",
+            color: hovIdx === i ? C.textMuted : C.textDim,
+            transition:"color 0.2s",
+          }}>{m.l}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   WATERFALL BREAKDOWN — interactive timeline
+───────────────────────────────────────── */
+function WaterfallBreakdown() {
+  const [hovIdx, setHovIdx] = useState<number | null>(null);
+
+  const segments = [
+    { label:"Network Hop",     ms:"~2ms",  pct:10, color:C.accent,     glow:"rgba(0,229,204,0.5)",    desc:"Signal received from Polymarket WSS stream co-located in EU-West-1." },
+    { label:"Risk Check",      ms:"~8ms",  pct:40, color:C.accentAlt,  glow:"rgba(124,92,252,0.5)",   desc:"Position sizing, conviction threshold, exposure limits verified." },
+    { label:"Order Placement", ms:"~6ms",  pct:30, color:C.accentPink, glow:"rgba(244,114,182,0.5)",  desc:"Limit/market order constructed and submitted to Polymarket CLOB." },
+    { label:"Confirm + Log",   ms:"~4ms",  pct:20, color:"#4ade80",    glow:"rgba(74,222,128,0.4)",   desc:"Fill confirmed, position logged, P&L tracking initialised." },
+  ];
+
+  return (
+    <div style={{
+      marginTop:64, padding:"32px 32px 28px", borderRadius:18, background:C.bgDeep,
+      border:"1px solid rgba(255,255,255,0.05)",
+      boxShadow:"inset 0 1px 0 rgba(255,255,255,0.025), 0 24px 64px rgba(0,0,0,0.4)",
+    }}>
+      {/* Header row */}
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{
+            width:7, height:7, borderRadius:"50%", background:C.accent,
+            boxShadow:"0 0 8px rgba(0,229,204,0.7)",
+            animation:"glow-pulse 2s ease-in-out infinite",
+          }}/>
+          <span className="font-mono" style={{ fontSize:10, color:C.textDim, letterSpacing:"0.16em", textTransform:"uppercase" }}>
+            Network Waterfall Breakdown
+          </span>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <span className="font-mono" style={{ fontSize:11, color:C.accent, fontWeight:700, letterSpacing:"-0.01em" }}>
+            Total: &lt;20ms
+          </span>
+        </div>
+      </div>
+
+      {/* Segmented bar */}
+      <div style={{ display:"flex", height:36, borderRadius:10, overflow:"hidden", marginBottom:20, gap:2 }}>
+        {segments.map((s, i) => (
+          <div
+            key={i}
+            onMouseEnter={() => setHovIdx(i)}
+            onMouseLeave={() => setHovIdx(null)}
+            style={{
+              flex:`0 0 ${s.pct}%`,
+              background: hovIdx === i
+                ? `linear-gradient(135deg, ${s.color}cc, ${s.color}88)`
+                : `linear-gradient(135deg, ${s.color}55, ${s.color}33)`,
+              borderRadius: i === 0 ? "9px 0 0 9px" : i === segments.length-1 ? "0 9px 9px 0" : 0,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              cursor:"default",
+              transform: hovIdx === i ? "scaleY(1.08)" : "scaleY(1)",
+              transition:"all 0.22s cubic-bezier(.16,1,.3,1)",
+              boxShadow: hovIdx === i ? `0 0 24px ${s.glow}` : "none",
+              position:"relative",
+            }}
+          >
+            {hovIdx === i && (
+              <span className="font-mono" style={{
+                fontSize:11, fontWeight:700, color:"#fff",
+                textShadow:`0 0 12px ${s.color}`,
+                letterSpacing:"-0.01em",
+                pointerEvents:"none",
+              }}>{s.ms}</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Segment detail rows */}
+      <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
+        {segments.map((s, i) => (
+          <div
+            key={i}
+            onMouseEnter={() => setHovIdx(i)}
+            onMouseLeave={() => setHovIdx(null)}
+            style={{
+              display:"flex", alignItems:"center", gap:14,
+              padding:"10px 14px", borderRadius:10, cursor:"default",
+              background: hovIdx === i ? `${s.color}08` : "transparent",
+              border: `1px solid ${hovIdx === i ? `${s.color}20` : "transparent"}`,
+              transition:"all 0.18s ease",
+            }}
+          >
+            {/* Colour swatch */}
+            <div style={{
+              width:3, height:36, borderRadius:2, flexShrink:0,
+              background:`linear-gradient(180deg, ${s.color}, ${s.color}55)`,
+              boxShadow: hovIdx === i ? `0 0 10px ${s.glow}` : "none",
+              transition:"box-shadow 0.2s",
+            }}/>
+            {/* Labels */}
+            <div style={{ flex:1 }}>
+              <div style={{ display:"flex", alignItems:"baseline", gap:10, marginBottom:3 }}>
+                <span className="font-syne" style={{ fontSize:12, fontWeight:700, color: hovIdx === i ? "#fff" : C.text }}>
+                  {s.label}
+                </span>
+                <span className="font-mono" style={{
+                  fontSize:11, fontWeight:700, color:s.color,
+                  textShadow: hovIdx === i ? `0 0 14px ${s.glow}` : "none",
+                  transition:"text-shadow 0.2s",
+                }}>{s.ms}</span>
+              </div>
+              <div style={{ fontSize:11, color:C.textMuted, lineHeight:1.5,
+                maxHeight: hovIdx === i ? 40 : 0, overflow:"hidden",
+                transition:"max-height 0.3s ease", opacity: hovIdx === i ? 1 : 0,
+              }}>
+                {s.desc}
+              </div>
+            </div>
+            {/* Pct badge */}
+            <div className="font-mono" style={{
+              fontSize:9, color: hovIdx === i ? s.color : C.textDim,
+              padding:"3px 8px", borderRadius:5,
+              background: hovIdx === i ? `${s.color}12` : "rgba(255,255,255,0.03)",
+              border:`1px solid ${hovIdx === i ? `${s.color}22` : "rgba(255,255,255,0.04)"}`,
+              transition:"all 0.18s",
+              letterSpacing:"0.06em",
+            }}>{s.pct}%</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   SECTION 1 — Latency Terminal
 ───────────────────────────────────────── */
 function LatencySection() {
   const ref = useReveal();
-  const [zapHov, setZapHov] = useState(false);
 
   const bars = [
     { label:"Human Trader",  sub:"Toronto, ON", ms:"150–300ms", pct:92, color:C.accentPink, glow:"rgba(244,114,182,0.35)" },
@@ -895,40 +1084,15 @@ function LatencySection() {
               A human trader in Toronto faces 150–300&thinsp;ms of round-trip latency
               before their order even touches the book. The spread has already moved.
             </p>
-            <p style={{ fontSize:15, lineHeight:1.82, color:C.textMuted, marginBottom:40, maxWidth:440 }}>
+            <p style={{ fontSize:15, lineHeight:1.82, color:C.textMuted, marginBottom:36, maxWidth:440 }}>
               PolyWhale is co-located in the same datacenter. Detection, risk-check,
               and order-placement resolve in{" "}
               <em style={{ color:"#fff", fontStyle:"normal" }}>under 20&thinsp;milliseconds</em>.
               This is a structural advantage, not a marginal one.
             </p>
 
-            <div
-              onMouseEnter={() => setZapHov(true)}
-              onMouseLeave={() => setZapHov(false)}
-              style={{
-                display:"inline-flex", alignItems:"center", gap:14,
-                padding:"13px 22px", borderRadius:13,
-                background: zapHov ? "rgba(0,229,204,0.07)" : "rgba(0,229,204,0.03)",
-                border:`1px solid ${zapHov ? "rgba(0,229,204,0.18)" : C.border}`,
-                cursor:"default", transition:"all 0.3s ease",
-                animation:"glow-pulse 3s ease-in-out infinite",
-              }}
-            >
-              <div style={{
-                color:C.accent,
-                transition:"filter 0.3s",
-                filter: zapHov ? "drop-shadow(0 0 10px rgba(0,229,204,0.8))" : "none",
-              }}>
-                <Zap size={20}/>
-              </div>
-              <div>
-                <div className="font-mono" style={{
-                  fontSize:18, color:C.accent, fontWeight:700, letterSpacing:"-0.02em",
-                  textShadow:"0 0 20px rgba(0,229,204,0.5)",
-                }}>14.2ms</div>
-                <div style={{ fontSize:11, color:C.textDim, marginTop:1 }}>avg. round-trip execution</div>
-              </div>
-            </div>
+            {/* ── Three-metric glass grid ── */}
+            <MetricGrid/>
           </div>
 
           {/* Bloomberg Terminal Panel */}
@@ -1014,38 +1178,9 @@ function LatencySection() {
           </div>
         </div>
 
-        {/* Execution formula */}
-        <div style={{
-          marginTop:64, padding:"36px 32px", borderRadius:16, background:C.bgDeep,
-          border:"1px solid rgba(255,255,255,0.05)", textAlign:"center",
-          boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)",
-        }}>
-          <div className="font-mono" style={{
-            fontSize:9, color:C.textDim, textTransform:"uppercase",
-            letterSpacing:"0.18em", marginBottom:20,
-          }}>Execution Model</div>
-          <div className="font-mono" style={{
-            fontSize:"clamp(13px,2vw,18px)", color:"#fff", fontWeight:500, lineHeight:2.2,
-          }}>
-            <span style={{ color:C.textDim }}>T<sub>total</sub></span>
-            <span style={{ color:"rgba(255,255,255,0.12)", margin:"0 10px" }}>=</span>
-            <span style={{ color:C.accentAlt }}>T<sub>net</sub></span>
-            <span style={{ color:"rgba(255,255,255,0.1)", margin:"0 8px" }}>+</span>
-            <span style={{ color:C.accentAlt }}>T<sub>risk</sub></span>
-            <span style={{ color:"rgba(255,255,255,0.1)", margin:"0 8px" }}>+</span>
-            <span style={{ color:C.accentAlt }}>T<sub>exec</sub></span>
-            <span style={{ color:"rgba(255,255,255,0.1)", margin:"0 10px" }}>&lt;</span>
-            <span style={{ color:C.accent, fontWeight:700, textShadow:"0 0 22px rgba(0,229,204,0.4)" }}>20ms</span>
-          </div>
-          <div style={{ display:"flex", justifyContent:"center", gap:40, marginTop:20, flexWrap:"wrap" }}>
-            {[{v:"~2ms",n:"network hop"},{v:"~8ms",n:"risk checks"},{v:"~6ms",n:"order + confirm"}].map((t,i)=>(
-              <div key={i} style={{ textAlign:"center" }}>
-                <div className="font-mono" style={{ fontSize:14, color:C.accent, fontWeight:700 }}>{t.v}</div>
-                <div style={{ fontSize:10, color:C.textDim, marginTop:3 }}>{t.n}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Network Waterfall Breakdown — replaces text formula */}
+        <WaterfallBreakdown/>
+
       </div>
     </section>
   );
@@ -1229,40 +1364,40 @@ function ArchSideNode({ icon, color, label, sublabel, items, pulse }: {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        width:176, flexShrink:0, padding:"22px 18px", borderRadius:16, textAlign:"center",
-        background: hov ? `${color}08` : "#090f1e",
+        width:184, flexShrink:0, padding:"24px 18px 20px", borderRadius:16, textAlign:"center",
+        background: hov ? `${color}09` : "#090f1e",
         border:`1px solid ${hov ? `${color}28` : "rgba(255,255,255,0.06)"}`,
-        boxShadow: hov ? `0 0 40px ${color}10` : "none",
+        boxShadow: hov ? `0 0 40px ${color}12` : "none",
         transform: hov ? "translateY(-4px)" : "translateY(0)",
         transition:"all 0.3s cubic-bezier(.16,1,.3,1)",
       }}
     >
-      <div style={{ position:"relative", display:"inline-flex", marginBottom:14 }}>
+      {/* Icon — pulse is a tight box-shadow on the icon itself, not a bleeding ring */}
+      <div style={{ display:"inline-flex", marginBottom:14 }}>
         <div style={{
-          width:46, height:46, borderRadius:12,
-          background:`${color}0a`, border:`1px solid ${color}1a`,
+          width:48, height:48, borderRadius:13,
+          background:`${color}0d`, border:`1px solid ${color}22`,
           display:"flex", alignItems:"center", justifyContent:"center", color,
+          /* Tight glow-pulse confined strictly to this box */
+          animation: pulse ? "glow-pulse 2.2s ease-in-out infinite" : "none",
+          transition:"box-shadow 0.3s",
         }}>{icon}</div>
-        {pulse && (
-          <div style={{
-            position:"absolute", inset:-7, borderRadius:18,
-            border:`1px solid ${color}`,
-            animation:"signal-ring 2.2s ease-out infinite",
-            pointerEvents:"none",
-          }}/>
-        )}
       </div>
 
-      <div className="font-syne" style={{ fontSize:13, fontWeight:700, color:"#fff", marginBottom:3 }}>{label}</div>
-      <div style={{ fontSize:10, color:C.textDim, marginBottom:14 }}>{sublabel}</div>
+      <div className="font-syne" style={{
+        fontSize:13, fontWeight:700, color:"#fff", marginBottom:4, letterSpacing:"-0.01em",
+      }}>{label}</div>
+      <div style={{
+        fontSize:11, color:C.textDim, marginBottom:16, lineHeight:1.4,
+      }}>{sublabel}</div>
 
-      <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
         {items.map((item, i) => (
           <div key={i} style={{
-            fontSize:9, color, fontFamily:"JetBrains Mono, monospace", fontWeight:600,
-            padding:"4px 8px", borderRadius:6,
-            background:`${color}07`, border:`1px solid ${color}10`,
-            letterSpacing:"0.05em",
+            fontSize:10, color, fontFamily:"JetBrains Mono, monospace", fontWeight:600,
+            padding:"5px 9px", borderRadius:7,
+            background:`${color}08`, border:`1px solid ${color}12`,
+            letterSpacing:"0.04em", lineHeight:1.3,
           }}>{item}</div>
         ))}
       </div>
@@ -1372,25 +1507,158 @@ function MirroringSection() {
 }
 
 /* ─────────────────────────────────────────
-   SECTION 3 — Enterprise Security — untouched
+   SECURITY FEATURE LIST — extracted so useState
+   is called at component level, not inside .map()
+───────────────────────────────────────── */
+type SecFeature = {
+  Icon: React.ComponentType<{ size: number }>;
+  color: string;
+  title: string;
+  desc: string;
+  sub: string;
+};
+
+function SecurityFeatureList({ features }: { features: SecFeature[] }) {
+  const [hovIdx, setHovIdx] = useState<number | null>(null);
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+      {features.map((f, i) => {
+        const hov = hovIdx === i;
+        return (
+          <div
+            key={i}
+            onMouseEnter={() => setHovIdx(i)}
+            onMouseLeave={() => setHovIdx(null)}
+            style={{
+              display:"flex", gap:16, alignItems:"flex-start",
+              padding:"18px 20px",
+              borderRadius:14,
+              background: hov ? `${f.color}07` : "rgba(255,255,255,0.015)",
+              border:`1px solid ${hov ? `${f.color}1e` : "rgba(255,255,255,0.04)"}`,
+              transform: hov ? "translateX(5px)" : "translateX(0)",
+              transition:"all 0.25s cubic-bezier(.16,1,.3,1)",
+              cursor:"default",
+            }}
+          >
+            {/* Icon box */}
+            <div style={{
+              width:38, height:38, borderRadius:10, flexShrink:0,
+              background:`${f.color}0c`, border:`1px solid ${f.color}1a`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              color: f.color,
+              transform: hov ? "rotate(-5deg) scale(1.08)" : "rotate(0) scale(1)",
+              transition:"transform 0.25s cubic-bezier(.16,1,.3,1)",
+            }}>
+              <f.Icon size={16}/>
+            </div>
+
+            {/* Text block */}
+            <div style={{ flex:1, minWidth:0 }}>
+              <div className="font-syne" style={{
+                fontSize:13, fontWeight:700,
+                color: hov ? "#fff" : C.text,
+                marginBottom:4, letterSpacing:"-0.01em",
+                transition:"color 0.2s",
+              }}>{f.title}</div>
+
+              {/* Full desc — slides down on hover */}
+              <div style={{
+                fontSize:12, lineHeight:1.68, color:C.textMuted,
+                maxHeight: hov ? 120 : 0,
+                overflow:"hidden",
+                opacity: hov ? 1 : 0,
+                transition:"max-height 0.32s ease, opacity 0.22s ease",
+              }}>{f.desc}</div>
+
+              {/* One-liner — visible when collapsed */}
+              <div style={{
+                fontSize:11, color:C.textDim,
+                maxHeight: hov ? 0 : 18,
+                overflow:"hidden",
+                opacity: hov ? 0 : 1,
+                transition:"max-height 0.32s ease, opacity 0.18s ease",
+              }}>{f.sub}</div>
+            </div>
+
+            {/* Right accent bar */}
+            <div style={{
+              width:2, alignSelf:"stretch", borderRadius:2, flexShrink:0,
+              background:`linear-gradient(180deg, ${f.color}, ${f.color}22)`,
+              opacity: hov ? 1 : 0,
+              transition:"opacity 0.22s",
+            }}/>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
+   SECTION 3 — Security Architecture & API Console
 ───────────────────────────────────────── */
 function SecuritySection() {
   const ref = useReveal();
   const [shieldHov, setShieldHov] = useState(false);
 
-  const cards = [
-    { icon:<Key size={17}/>,         color:C.accent,
-      title:"Trade-Only Permissions",
-      desc:'We only request "Trade" permissions on your Polymarket API key. Withdrawal access is never requested — it\'s architecturally impossible for us to move your funds.' },
-    { icon:<Shield size={17}/>,      color:C.accentAlt,
-      title:"Funds Stay on Polymarket",
-      desc:"Your USDC balance stays in your Polymarket account at all times. PolyWhale sends trade instructions as a SaaS layer — we're not a custodian or wallet provider." },
-    { icon:<Fingerprint size={17}/>, color:C.accentPink,
-      title:"Revoke Access Instantly",
-      desc:"API keys can be regenerated or revoked from your Polymarket settings in seconds, immediately cutting off bot access with zero risk to your balance." },
-    { icon:<ShieldCheck size={17}/>, color:"#fbbf24",
-      title:"AES-256 Encryption",
-      desc:"All keys encrypted at rest with AES-256, transmitted over TLS 1.3. Stored in an isolated vault with zero-trust access controls and automatic rotation." },
+  /* JSON lines with syntax data */
+  const jsonLines: { indent: number; content: React.ReactNode }[] = [
+    { indent:0, content: <span style={{ color:"rgba(255,255,255,0.25)" }}>{"{"}</span> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;api_version&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"#e9c46a" }}>&quot;v2.4.1&quot;</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;key_scope&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:C.accent }}>&quot;TRADE_ONLY&quot;</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;issued_to&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"#e9c46a" }}>&quot;polywhale-engine-eu1&quot;</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;permissions&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"rgba(255,255,255,0.25)" }}>{"{"}</span></> },
+    { indent:2, content: <><span style={{ color:C.accent }}>&quot;read_positions&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:C.accent, fontWeight:700 }}>true</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:2, content: <><span style={{ color:C.accent }}>&quot;execute_orders&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:C.accent, fontWeight:700 }}>true</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:2, content: <><span style={{ color:C.accent }}>&quot;cancel_orders&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:C.accent, fontWeight:700 }}>true</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:2, content:
+        <div style={{
+          display:"inline-flex", alignItems:"center", gap:8,
+          background:"rgba(244,114,182,0.08)", borderRadius:6,
+          padding:"2px 8px 2px 6px",
+          border:"1px solid rgba(244,114,182,0.18)",
+        }}>
+          <span style={{ color:C.accentPink }}>&quot;withdraw_funds&quot;</span>
+          <span style={{ color:"rgba(255,255,255,0.2)" }}>: </span>
+          <span style={{ color:C.accentPink, fontWeight:700 }}>false</span>
+          <span style={{ fontSize:9, color:C.accentPink, fontWeight:700, letterSpacing:"0.08em",
+            background:"rgba(244,114,182,0.12)", padding:"1px 5px", borderRadius:4, marginLeft:4,
+          }}>BLOCKED</span>
+        </div>
+    },
+    { indent:1, content: <><span style={{ color:"rgba(255,255,255,0.25)" }}>{"}"}</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;encryption&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"#e9c46a" }}>&quot;AES-256-GCM&quot;</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;transport&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"#e9c46a" }}>&quot;TLS 1.3&quot;</span><span style={{ color:"rgba(255,255,255,0.15)" }}>,</span></> },
+    { indent:1, content: <><span style={{ color:C.accentAlt }}>&quot;vault_access&quot;</span><span style={{ color:"rgba(255,255,255,0.2)" }}>: </span><span style={{ color:"#e9c46a" }}>&quot;zero-trust / isolated&quot;</span></> },
+    { indent:0, content: <span style={{ color:"rgba(255,255,255,0.25)" }}>{"}"}</span> },
+  ];
+
+  /* Security features for right column */
+  const secFeatures: SecFeature[] = [
+    {
+      Icon: Key, color: C.accent,
+      title: "Trade-Only Permissions",
+      sub: "API scope · trade only · no withdrawals",
+      desc: "We request only the minimum API scope required to mirror trades. Withdrawal is structurally impossible — not a policy promise, a hard technical boundary.",
+    },
+    {
+      Icon: Shield, color: C.accentAlt,
+      title: "Funds Stay on Polymarket",
+      sub: "Non-custodial · USDC stays in your account",
+      desc: "Your USDC balance never leaves your Polymarket account. PolyWhale is a pure execution SaaS layer — not a custodian or wallet provider.",
+    },
+    {
+      Icon: Fingerprint, color: C.accentPink,
+      title: "Instant Key Revocation",
+      sub: "Revoke instantly from Polymarket settings",
+      desc: "Regenerate or delete your API key from Polymarket settings at any time. Bot access cuts off instantly with zero risk to your balance.",
+    },
+    {
+      Icon: ShieldCheck, color: "#fbbf24",
+      title: "AES-256-GCM Encryption",
+      sub: "AES-256-GCM at rest · TLS 1.3 in transit",
+      desc: "All credentials encrypted at rest with AES-256-GCM and in transit over TLS 1.3. Stored in an isolated zero-trust vault with automatic rotation.",
+    },
   ];
 
   return (
@@ -1398,6 +1666,7 @@ function SecuritySection() {
       <div ref={ref} className="rv" style={{ maxWidth:1000, margin:"0 auto" }}>
         <SectionLabel num="03" text="Secure API Integration" color={C.accentPink}/>
 
+        {/* Section header */}
         <div style={{ display:"flex", alignItems:"flex-start", gap:20, marginBottom:52, flexWrap:"wrap" }}>
           <div style={{ flex:"1 1 440px" }}>
             <h2 className="font-syne" style={{
@@ -1434,129 +1703,93 @@ function SecuritySection() {
           </div>
         </div>
 
-        {/* Permission panels */}
+        {/* ── Two-column: API Console + Security Features ── */}
         <div className="perm-grid" style={{
-          display:"grid", gridTemplateColumns:"1fr 1fr", gap:2,
-          borderRadius:18, overflow:"hidden", marginBottom:44,
-          border:"1px solid rgba(255,255,255,0.05)",
-          boxShadow:"0 28px 80px rgba(0,0,0,0.45)",
+          display:"grid", gridTemplateColumns:"1fr 1fr", gap:24, alignItems:"start",
         }}>
+
+          {/* LEFT — Glassmorphism JSON API Console */}
           <div style={{
-            padding:32,
-            background:"linear-gradient(150deg,rgba(0,229,204,0.07) 0%,rgba(6,10,24,0.92) 100%)",
-            borderRight:"1px solid rgba(0,229,204,0.05)",
+            borderRadius:16,
+            background:"rgba(4,8,18,0.97)",
+            border:"1px solid rgba(0,229,204,0.09)",
+            boxShadow:"0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.025)",
+            overflow:"hidden",
           }}>
-            <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:22 }}>
-              <div style={{ width:7, height:7, borderRadius:"50%", background:C.accent, boxShadow:`0 0 8px ${C.accent}70` }}/>
-              <span className="font-mono" style={{ fontSize:10, fontWeight:700, color:C.accent, letterSpacing:"0.12em", textTransform:"uppercase" }}>Granted</span>
-            </div>
-            {["Place Market Orders","Place Limit Orders","Cancel Open Orders","Read Position Data"].map((p,i)=>(
-              <div key={i} style={{
-                display:"flex", alignItems:"center", gap:11, padding:"10px 0",
-                borderBottom: i < 3 ? "1px solid rgba(0,229,204,0.05)" : "none",
-              }}>
-                <div style={{
-                  width:20, height:20, borderRadius:6, flexShrink:0,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  background:"rgba(0,229,204,0.07)", border:"1px solid rgba(0,229,204,0.12)",
-                }}>
-                  <Check size={10} color={C.accent} strokeWidth={3}/>
+            {/* Window chrome */}
+            <div style={{
+              display:"flex", alignItems:"center", justifyContent:"space-between",
+              padding:"10px 16px",
+              background:"rgba(255,255,255,0.018)",
+              borderBottom:"1px solid rgba(255,255,255,0.035)",
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <div style={{ display:"flex", gap:6 }}>
+                  {(["#ff5f57","#febc2e","#28c840"] as string[]).map((col, i) => (
+                    <div key={i} style={{ width:10, height:10, borderRadius:"50%", background:col, opacity:0.7 }}/>
+                  ))}
                 </div>
-                <span className="font-mono" style={{ fontSize:12, color:C.text, fontWeight:500 }}>{p}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{
-            padding:32,
-            background:"linear-gradient(150deg,rgba(244,114,182,0.07) 0%,rgba(6,10,24,0.92) 100%)",
-          }}>
-            <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:22 }}>
-              <div style={{ width:7, height:7, borderRadius:"50%", background:C.accentPink, opacity:0.5 }}/>
-              <span className="font-mono" style={{ fontSize:10, fontWeight:700, color:C.accentPink, letterSpacing:"0.12em", textTransform:"uppercase" }}>Never Requested</span>
-            </div>
-            {["Withdraw Funds","Transfer Assets","Modify Account Settings","Access Private Keys"].map((p,i)=>(
-              <div key={i} style={{
-                display:"flex", alignItems:"center", gap:11, padding:"10px 0",
-                borderBottom: i < 3 ? "1px solid rgba(244,114,182,0.05)" : "none",
-              }}>
-                <div style={{
-                  width:20, height:20, borderRadius:6, flexShrink:0,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  background:"rgba(244,114,182,0.06)", border:"1px solid rgba(244,114,182,0.08)",
+                <span className="font-mono" style={{
+                  fontSize:10, color:C.textDim, letterSpacing:"0.09em", marginLeft:6,
                 }}>
-                  <XIcon size={10} color={C.accentPink} strokeWidth={3}/>
-                </div>
-                <span className="font-mono" style={{ fontSize:12, color:"rgba(255,255,255,0.20)", fontWeight:500 }}>{p}</span>
+                  polymarket-api  —  key_info.json
+                </span>
               </div>
-            ))}
+              <div style={{ display:"flex", alignItems:"center", gap:5 }}>
+                <div style={{
+                  width:5, height:5, borderRadius:"50%", background:C.accent,
+                  boxShadow:`0 0 6px ${C.accent}90`,
+                }}/>
+                <span className="font-mono" style={{ fontSize:9, color:C.accent, letterSpacing:"0.12em" }}>200 OK</span>
+              </div>
+            </div>
+
+            {/* Line-number gutter + JSON body */}
+            <div style={{ display:"flex", padding:"20px 0" }}>
+              {/* Line numbers */}
+              <div style={{
+                paddingLeft:16, paddingRight:12,
+                borderRight:"1px solid rgba(255,255,255,0.04)",
+                userSelect:"none",
+              }}>
+                {jsonLines.map((_, i) => (
+                  <div key={i} className="font-mono" style={{
+                    fontSize:11, lineHeight:"1.9", color:"#2d4060", textAlign:"right",
+                  }}>{i + 1}</div>
+                ))}
+              </div>
+              {/* Code body */}
+              <div style={{ paddingLeft:18, paddingRight:20, flex:1, overflow:"hidden" }}>
+                {jsonLines.map((line, i) => (
+                  <div key={i} className="font-mono" style={{
+                    fontSize:11.5, lineHeight:"1.9",
+                    paddingLeft: line.indent * 18,
+                    whiteSpace:"nowrap",
+                  }}>
+                    {line.content}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Console footer */}
+            <div style={{
+              borderTop:"1px solid rgba(255,255,255,0.035)",
+              padding:"8px 16px",
+              background:"rgba(255,255,255,0.012)",
+              display:"flex", alignItems:"center", gap:8,
+            }}>
+              <Lock size={10} color={C.accent} style={{ opacity:0.6 }}/>
+              <span className="font-mono" style={{ fontSize:9, color:C.textDim, letterSpacing:"0.08em" }}>
+                Scope verified · withdraw_funds structurally blocked · read-only audit log
+              </span>
+            </div>
           </div>
+
+          {/* RIGHT — Security feature vertical list */}
+          <SecurityFeatureList features={secFeatures}/>
         </div>
 
-        {/* Trade-Only callout */}
-        <div style={{
-          padding:"20px 28px", borderRadius:14, marginBottom:44,
-          background:"rgba(0,229,204,0.04)",
-          border:"1px solid rgba(0,229,204,0.12)",
-          display:"flex", alignItems:"center", gap:16,
-        }}>
-          <div style={{
-            width:36, height:36, borderRadius:9, flexShrink:0,
-            background:"rgba(0,229,204,0.08)", border:"1px solid rgba(0,229,204,0.14)",
-            display:"flex", alignItems:"center", justifyContent:"center",
-          }}>
-            <Key size={16} color={C.accent}/>
-          </div>
-          <div>
-            <span className="font-mono" style={{
-              fontSize:11, fontWeight:700, color:C.accent,
-              letterSpacing:"0.1em", textTransform:"uppercase",
-              background:"rgba(0,229,204,0.10)", padding:"3px 9px",
-              borderRadius:5, marginRight:10, border:"1px solid rgba(0,229,204,0.18)",
-            }}>Trade-Only</span>
-            <span style={{ fontSize:13, color:C.textMuted, lineHeight:1.6 }}>
-              Our API scope is structurally constrained to order operations. Withdrawal access
-              is{" "}<strong style={{ color:"#fff", fontWeight:600 }}>architecturally impossible</strong>{" "}
-              — not a policy decision, but a hard technical boundary.
-            </span>
-          </div>
-        </div>
-
-        {/* Security cards */}
-        <div className="sec-cards" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
-          {cards.map((card, i) => {
-            const [hov, setHov] = useState(false);
-            return (
-              <div
-                key={i}
-                onMouseEnter={() => setHov(true)}
-                onMouseLeave={() => setHov(false)}
-                style={{
-                  padding:"26px 24px", borderRadius:16,
-                  background: hov ? `${card.color}06` : C.bgDeep,
-                  border:`1px solid ${hov ? `${card.color}22` : "rgba(255,255,255,0.05)"}`,
-                  transform: hov ? "translateY(-4px)" : "translateY(0)",
-                  boxShadow: hov ? `0 0 44px ${card.color}0a` : "none",
-                  transition:"all 0.35s cubic-bezier(.16,1,.3,1)",
-                }}
-              >
-                <div style={{
-                  width:38, height:38, borderRadius:10,
-                  background:`${card.color}07`, border:`1px solid ${card.color}10`,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  color:card.color, marginBottom:16,
-                  transform: hov ? "rotate(-6deg) scale(1.08)" : "rotate(0)",
-                  transition:"transform 0.3s ease",
-                }}>
-                  {card.icon}
-                </div>
-                <h4 className="font-syne" style={{
-                  fontSize:14, fontWeight:700, color:"#fff", marginBottom:9, letterSpacing:"-0.02em",
-                }}>{card.title}</h4>
-                <p style={{ fontSize:13, lineHeight:1.74, color:C.textMuted }}>{card.desc}</p>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );
