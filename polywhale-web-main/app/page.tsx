@@ -298,12 +298,9 @@ function Header({
             <a
               key={l}
               href={getLinkHref(l)}
-              style={{
-                ...linkStyle,
-                color: l === "Whales" ? COLORS.accent : "#e2e8f0",
-              }}
+              style={linkStyle}
               onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = COLORS.accent)}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = l === "Whales" ? COLORS.accent : "#e2e8f0")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#e2e8f0")}
             >
               {l}
             </a>
@@ -467,7 +464,7 @@ function Header({
               href={getLinkHref(l)}
               onClick={() => setMobileOpen(false)}
               style={{
-                color: l === "Whales" ? COLORS.accent : "#e2e8f0",
+                color: "#e2e8f0",
                 textDecoration: "none",
                 fontSize: 15,
                 fontWeight: 700,
@@ -904,35 +901,37 @@ function Hero(): React.JSX.Element {
               <User size={18} /> Create Account
             </button>
 
-            <button
-              style={{
-                padding: "14px 28px",
-                borderRadius: 12,
-                cursor: "pointer",
-                background: "rgba(0,229,204,0.06)",
-                border: "1px solid rgba(0,229,204,0.2)",
-                color: COLORS.accent,
-                fontWeight: 600,
-                fontSize: 15,
-                fontFamily: "Syne, sans-serif",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                const t = e.currentTarget as HTMLButtonElement;
-                t.style.background = "rgba(0,229,204,0.12)";
-                t.style.borderColor = "rgba(0,229,204,0.35)";
-              }}
-              onMouseLeave={(e) => {
-                const t = e.currentTarget as HTMLButtonElement;
-                t.style.background = "rgba(0,229,204,0.06)";
-                t.style.borderColor = "rgba(0,229,204,0.2)";
-              }}
-            >
-              <TrendingUp size={18} /> See Live Trades
-            </button>
+            <a href="/whales" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  padding: "14px 28px",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  background: "rgba(0,229,204,0.06)",
+                  border: "1px solid rgba(0,229,204,0.2)",
+                  color: COLORS.accent,
+                  fontWeight: 600,
+                  fontSize: 15,
+                  fontFamily: "Syne, sans-serif",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  const t = e.currentTarget as HTMLButtonElement;
+                  t.style.background = "rgba(0,229,204,0.12)";
+                  t.style.borderColor = "rgba(0,229,204,0.35)";
+                }}
+                onMouseLeave={(e) => {
+                  const t = e.currentTarget as HTMLButtonElement;
+                  t.style.background = "rgba(0,229,204,0.06)";
+                  t.style.borderColor = "rgba(0,229,204,0.2)";
+                }}
+              >
+                <TrendingUp size={18} /> See Live Trades
+              </button>
+            </a>
           </div>
 
           {/* Quick stats */}
