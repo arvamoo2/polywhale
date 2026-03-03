@@ -166,6 +166,10 @@ function GlobalStyles(): React.JSX.Element {
         0%, 100% { box-shadow: 0 0 8px rgba(0,229,204,0.5); transform: scale(1); }
         50% { box-shadow: 0 0 22px rgba(0,229,204,0.9), 0 0 44px rgba(0,229,204,0.3); transform: scale(1.04); }
       }
+      @keyframes pending-pulse {
+        0%, 100% { opacity: 0.45; }
+        50% { opacity: 1; }
+      }
       @keyframes feed-row-in {
         from { opacity: 0; transform: translateX(-16px); }
         to   { opacity: 1; transform: translateX(0); }
@@ -1361,6 +1365,7 @@ function ConvictionCard(): React.JSX.Element {
    ═══════════════════════════════════════ */
 function LiveFeed(): React.JSX.Element {
   const ref = useReveal(0.1);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
 
   const trades = [
     {
@@ -1384,6 +1389,10 @@ function LiveFeed(): React.JSX.Element {
       algo: "SCALING TO 4.5% PORTFOLIO", status: "PENDING", time: "now",
     },
   ];
+
+  /* Semantic action color: BUY YES = cyan, everything else = red */
+  const actionColor = (action: string): string =>
+    action === "BUY YES" ? COLORS.accent : "#ff3b3b";
 
   return (
     <section style={{ padding: "0 24px 160px" }}>
@@ -1435,32 +1444,39 @@ function LiveFeed(): React.JSX.Element {
           {/* Feed rows */}
           <div style={{ padding: "6px 0" }}>
             {trades.map((t, i) => {
-              const isSell = t.action.includes("SELL");
               const isConfirmed = t.status === "CONFIRMED";
+              const isHovered   = hoveredRow === i;
 
               return (
                 <div
                   key={i}
+                  onMouseEnter={() => setHoveredRow(i)}
+                  onMouseLeave={() => setHoveredRow(null)}
                   style={{
                     padding: "16px 28px",
+                    paddingLeft: isHovered ? "26px" : "28px",   /* compensates for 2px border */
                     borderBottom: i < trades.length - 1 ? "1px solid rgba(255,255,255,0.02)" : "none",
-                    animation: `feed-row-in 0.4s ease ${i * 0.07}s both`,
-                    transition: "background 0.15s",
+                    borderLeft: isHovered ? `2px solid ${COLORS.accent}` : "2px solid transparent",
+                    background: isHovered ? "rgba(255,255,255,0.02)" : "transparent",
+                    /* staggered cascade entrance */
+                    animation: `feed-row-in 0.45s ease ${i * 0.1}s both`,
+                    transition: "background 0.2s ease, border-left-color 0.2s ease",
                     cursor: "default",
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.012)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                 >
                   <div className="font-mono" style={{ fontSize: 12, lineHeight: 2, color: COLORS.textSecondary }}>
+
                     {/* Line 1: Whale signal */}
                     <span style={{ color: "rgba(255,255,255,0.12)" }}>[</span>
                     <span style={{ color: COLORS.textSecondary }}>WHALE: </span>
                     <span style={{ color: "#fbbf24" }}>{t.whale}</span>
                     <span style={{ color: "rgba(255,255,255,0.12)" }}>]</span>
                     {" "}
-                    <span style={{ color: isSell ? COLORS.accentPink : COLORS.accent, fontWeight: 700 }}>{t.action}</span>
+                    {/* Semantic action color: BUY YES = cyan, BUY NO / SELL = red */}
+                    <span style={{ color: actionColor(t.action), fontWeight: 700 }}>{t.action}</span>
                     {" "}
-                    <span style={{ color: "#fff" }}>&ldquo;{t.market}&rdquo;</span>
+                    {/* Market name: bright white for maximum scannability */}
+                    <span style={{ color: "#ffffff", fontWeight: 600 }}>&ldquo;{t.market}&rdquo;</span>
                     <br />
 
                     {/* Line 2: Algo action */}
@@ -1482,14 +1498,18 @@ function LiveFeed(): React.JSX.Element {
                       display: "inline-block",
                       padding: "2px 10px", borderRadius: 4,
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.04em",
-                      background: isConfirmed ? "rgba(0,229,204,0.1)" : "rgba(251,191,36,0.1)",
+                      background: isConfirmed ? "rgba(0,229,204,0.1)" : "rgba(255,59,59,0.08)",
                       color: isConfirmed ? COLORS.accent : "#fbbf24",
-                      border: `1px solid ${isConfirmed ? "rgba(0,229,204,0.18)" : "rgba(251,191,36,0.18)"}`,
-                      animation: isConfirmed ? "status-glow 2.5s ease-in-out infinite" : "none",
+                      border: `1px solid ${isConfirmed ? "rgba(0,229,204,0.18)" : "rgba(251,191,36,0.2)"}`,
+                      /* CONFIRMED: static cyan glow; PENDING: breathing opacity pulse */
+                      animation: isConfirmed
+                        ? "status-glow 2.5s ease-in-out infinite"
+                        : "pending-pulse 1.4s ease-in-out infinite",
                     }}>
                       {isConfirmed ? "CONFIRMED ON-CHAIN" : "PENDING\u2026"}
                     </span>
                     <span style={{ color: "rgba(255,255,255,0.1)", fontSize: 10, marginLeft: 10 }}>{t.time}</span>
+
                   </div>
                 </div>
               );
