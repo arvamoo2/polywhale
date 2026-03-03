@@ -868,7 +868,11 @@ function Hero() {
 /* ─────────────────────────────────────────
    METRIC GRID — three-stat glass row
 ───────────────────────────────────────── */
-function MetricGrid() {
+/* ─────────────────────────────────────────
+   DATA RIBBON — full-width 3-stat enterprise strip
+   Sits between the two-column layout and the Waterfall
+───────────────────────────────────────── */
+function DataRibbon() {
   const [hovIdx, setHovIdx] = useState<number | null>(null);
 
   const metrics = [
@@ -879,10 +883,13 @@ function MetricGrid() {
 
   return (
     <div style={{
-      display:"flex", borderRadius:14, overflow:"hidden",
-      border:"1px solid rgba(255,255,255,0.06)",
-      background:C.bgDeep,
-      boxShadow:"inset 0 1px 0 rgba(255,255,255,0.03), 0 20px 48px rgba(0,0,0,0.4)",
+      display:"grid",
+      gridTemplateColumns:"repeat(3, 1fr)",
+      marginTop:40,
+      borderRadius:16,
+      background:"rgba(0,229,204,0.02)",
+      border:"1px solid rgba(0,229,204,0.08)",
+      overflow:"hidden",
     }}>
       {metrics.map((m, i) => (
         <div
@@ -890,33 +897,37 @@ function MetricGrid() {
           onMouseEnter={() => setHovIdx(i)}
           onMouseLeave={() => setHovIdx(null)}
           style={{
-            flex:1, padding:"20px 12px", textAlign:"center",
+            padding:"28px 24px",
+            display:"flex", flexDirection:"column",
+            alignItems:"center", justifyContent:"center",
+            textAlign:"center",
             borderRight: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none",
-            background: hovIdx === i ? `${m.color}09` : "transparent",
-            transition:"background 0.2s",
+            background: hovIdx === i ? `${m.color}07` : "transparent",
+            transition:"background 0.22s ease",
             cursor:"default",
           }}
         >
           <div style={{
             display:"flex", alignItems:"center", justifyContent:"center",
-            gap:6, marginBottom:8,
+            gap:8, marginBottom:10,
           }}>
             <m.Icon
-              size={12}
+              size={13}
               color={m.color}
-              style={{ opacity: hovIdx === i ? 1 : 0.45, transition:"opacity 0.2s" }}
+              style={{ opacity: hovIdx === i ? 1 : 0.4, transition:"opacity 0.22s" }}
             />
             <div className="font-mono" style={{
-              fontSize:22, fontWeight:700, color:m.color,
-              letterSpacing:"-0.03em",
-              textShadow: hovIdx === i ? `0 0 24px ${m.color}90` : "none",
+              fontSize:26, fontWeight:700, color:m.color,
+              letterSpacing:"-0.04em", lineHeight:1,
+              textShadow: hovIdx === i ? `0 0 28px ${m.color}80` : "none",
               transition:"text-shadow 0.22s",
             }}>{m.v}</div>
           </div>
           <div style={{
-            fontSize:10, letterSpacing:"0.05em",
+            fontSize:10, letterSpacing:"0.1em", textTransform:"uppercase",
             color: hovIdx === i ? C.textMuted : C.textDim,
-            transition:"color 0.2s",
+            fontFamily:"DM Sans, sans-serif", fontWeight:600,
+            transition:"color 0.22s",
           }}>{m.l}</div>
         </div>
       ))}
@@ -1084,15 +1095,12 @@ function LatencySection() {
               A human trader in Toronto faces 150–300&thinsp;ms of round-trip latency
               before their order even touches the book. The spread has already moved.
             </p>
-            <p style={{ fontSize:15, lineHeight:1.82, color:C.textMuted, marginBottom:36, maxWidth:440 }}>
+            <p style={{ fontSize:15, lineHeight:1.82, color:C.textMuted, marginBottom:0, maxWidth:440 }}>
               PolyWhale is co-located in the same datacenter. Detection, risk-check,
               and order-placement resolve in{" "}
               <em style={{ color:"#fff", fontStyle:"normal" }}>under 20&thinsp;milliseconds</em>.
               This is a structural advantage, not a marginal one.
             </p>
-
-            {/* ── Three-metric glass grid ── */}
-            <MetricGrid/>
           </div>
 
           {/* Bloomberg Terminal Panel */}
@@ -1177,6 +1185,9 @@ function LatencySection() {
             </div>
           </div>
         </div>
+
+        {/* ── Full-width Data Ribbon ── */}
+        <DataRibbon/>
 
         {/* Network Waterfall Breakdown — replaces text formula */}
         <WaterfallBreakdown/>
