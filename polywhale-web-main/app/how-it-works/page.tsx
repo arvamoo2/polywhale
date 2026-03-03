@@ -25,104 +25,185 @@ import {
 } from "lucide-react";
 
 /* ─────────────────────────────────────────
-   PALETTE
+   PALETTE  — copied EXACTLY from app/page.tsx (source of truth)
 ───────────────────────────────────────── */
+const COLORS = {
+  bg: "#060b18",
+  bgCard: "rgba(12,20,40,0.65)",
+  accent: "#00e5cc",
+  accentAlt: "#7c5cfc",
+  accentPink: "#f472b6",
+  textPrimary: "#e2e8f0",
+  textSecondary: "#8492a6",
+  border: "rgba(0,229,204,0.12)",
+};
+
+/* Local alias — keeps every downstream component compiling without changes */
 const C = {
-  bg:           "#060b18",
-  bgCard:       "rgba(11,18,33,0.80)",
+  bg:           COLORS.bg,
+  bgCard:       COLORS.bgCard,
   bgDeep:       "#0b1221",
-  accent:       "#00e5cc",
-  accentAlt:    "#7c5cfc",
-  accentPink:   "#f472b6",
-  text:         "#e2e8f0",
+  accent:       COLORS.accent,
+  accentAlt:    COLORS.accentAlt,
+  accentPink:   COLORS.accentPink,
+  text:         COLORS.textPrimary,
   textMuted:    "#94a3b8",
   textDim:      "#4a5568",
   border:       "rgba(255,255,255,0.04)",
-  borderAccent: "rgba(0,229,204,0.10)",
+  borderAccent: COLORS.border,
 };
 
 /* ─────────────────────────────────────────
-   GLOBAL STYLES
+   GLOBAL STYLES — copied EXACTLY from app/page.tsx (source of truth)
+   Extra keyframes required by how-it-works sections appended at the end.
 ───────────────────────────────────────── */
 function GlobalStyles(): React.JSX.Element {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 
       :root {
-        --accent:     ${C.accent};
-        --accent-alt: ${C.accentAlt};
-        --bg:         ${C.bg};
+        --accent: ${COLORS.accent};
+        --accent-alt: ${COLORS.accentAlt};
+        --bg: ${COLORS.bg};
       }
 
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      html, body {
+      body, html, #root {
         background: var(--bg);
-        color: ${C.text};
+        color: ${COLORS.textPrimary};
         font-family: 'DM Sans', sans-serif;
         overflow-x: hidden;
         scroll-behavior: smooth;
-        -webkit-font-smoothing: antialiased;
       }
 
-      .font-syne { font-family: 'Syne', sans-serif; }
-      .font-mono { font-family: 'JetBrains Mono', monospace; }
+      .font-display { font-family: 'Syne', sans-serif; }
+      .font-syne    { font-family: 'Syne', sans-serif; }
+      .font-mono    { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+      .glow-accent { text-shadow: 0 0 40px rgba(0,229,204,0.35); }
+      .glow-box { box-shadow: 0 0 60px -12px rgba(0,229,204,0.2), inset 0 1px 0 rgba(255,255,255,0.05); }
+      .glow-box-hover:hover { box-shadow: 0 0 80px -8px rgba(0,229,204,0.3), inset 0 1px 0 rgba(255,255,255,0.08); }
 
       .glass {
-        background: rgba(7,12,26,0.82);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255,255,255,0.04);
+        background: rgba(10,16,32,0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(0,229,204,0.08);
       }
 
+      @keyframes scroll-left {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .ticker-track { animation: scroll-left 45s linear infinite; }
+      .ticker-track:hover { animation-play-state: paused; }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(32px);
+        transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+      }
+      .reveal.visible { opacity: 1; transform: translateY(0); }
+
       @keyframes shimmer {
-        0%   { background-position: -200% 0; }
-        100% { background-position:  200% 0; }
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
       }
       .btn-shimmer {
-        background: linear-gradient(110deg,#00e5cc 0%,#00e5cc 38%,#7dfff0 50%,#00e5cc 62%,#00e5cc 100%);
+        background: linear-gradient(110deg, #00e5cc 0%, #00e5cc 40%, #7dfff0 50%, #00e5cc 60%, #00e5cc 100%);
         background-size: 200% 100%;
         animation: shimmer 3s ease-in-out infinite;
       }
 
       @keyframes grid-drift {
-        0%   { transform: translate(0,0); }
-        100% { transform: translate(48px,48px); }
+        0% { transform: translate(0,0); }
+        100% { transform: translate(40px,40px); }
       }
       .grid-bg {
         background-image:
-          linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-        background-size: 64px 64px;
-        animation: grid-drift 28s linear infinite;
+          linear-gradient(rgba(0,229,204,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0,229,204,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        animation: grid-drift 20s linear infinite;
       }
 
+      @keyframes dash-pulse {
+        0%,100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+
+      @keyframes icon-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+      }
+      @keyframes icon-glow-cyan {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(0,229,204,0.2)); }
+        50% { filter: drop-shadow(0 0 14px rgba(0,229,204,0.7)); }
+      }
+      @keyframes icon-glow-purple {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(124,92,252,0.2)); }
+        50% { filter: drop-shadow(0 0 14px rgba(124,92,252,0.7)); }
+      }
+      @keyframes icon-glow-pink {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(244,114,182,0.2)); }
+        50% { filter: drop-shadow(0 0 14px rgba(244,114,182,0.7)); }
+      }
+      @keyframes icon-glow-amber {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(251,191,36,0.2)); }
+        50% { filter: drop-shadow(0 0 14px rgba(251,191,36,0.7)); }
+      }
+
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(0,229,204,0.2); border-radius: 3px; }
+
+      @media(max-width:768px){
+        .hide-mobile { display:none!important }
+        .show-mobile-only { display:block!important }
+      }
+      @media(min-width:769px){
+        .show-mobile-only { display:none!important }
+      }
+      @media(max-width:900px){
+        .hero-grid { grid-template-columns:1fr!important }
+        .hide-on-wrap { display:none!important }
+      }
+      @media(max-width:768px){
+        .footer-grid { grid-template-columns:1fr 1fr!important }
+        .lat-layout  { flex-direction:column!important }
+        .perm-grid   { grid-template-columns:1fr!important }
+        .sec-cards   { grid-template-columns:1fr!important }
+        .arch-row    { flex-direction:column!important; align-items:center!important }
+      }
+
+      /* ── keyframes used by how-it-works sections ── */
       @keyframes fade-up {
         from { opacity:0; transform:translateY(28px); }
-        to   { opacity:1; transform:translateY(0);    }
+        to   { opacity:1; transform:translateY(0); }
       }
-
       @keyframes bar-fill {
         from { transform: scaleX(0); }
         to   { transform: scaleX(1); }
       }
-
       @keyframes signal-ring {
-        0%   { transform: scale(1); opacity: 0.7; }
+        0%   { transform: scale(1);   opacity: 0.7; }
         100% { transform: scale(2.8); opacity: 0; }
       }
-
       @keyframes scroll-dot {
-        0%,100% { opacity:0.3; transform:translateY(0);   }
+        0%,100% { opacity:0.3; transform:translateY(0); }
         50%     { opacity:1;   transform:translateY(7px); }
       }
-
       @keyframes glow-pulse {
         0%,100% { box-shadow: 0 0 12px rgba(0,229,204,0.14); }
         50%     { box-shadow: 0 0 28px rgba(0,229,204,0.38); }
       }
-
       @keyframes engine-glow {
         0%,100% {
           box-shadow: 0 0 0 1px rgba(0,229,204,0.12), 0 0 40px rgba(0,229,204,0.06), 0 24px 80px rgba(0,0,0,0.6);
@@ -131,39 +212,17 @@ function GlobalStyles(): React.JSX.Element {
           box-shadow: 0 0 0 1px rgba(0,229,204,0.22), 0 0 80px rgba(0,229,204,0.12), 0 24px 80px rgba(0,0,0,0.6);
         }
       }
-
       @keyframes terminal-in {
         from { opacity: 0; transform: translateX(-8px); }
         to   { opacity: 1; transform: translateX(0); }
       }
 
       .rv {
-        opacity:0;
-        transform:translateY(40px);
+        opacity: 0;
+        transform: translateY(40px);
         transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
       }
       .rv.vis { opacity:1; transform:translateY(0); }
-
-      ::-webkit-scrollbar { width:5px; }
-      ::-webkit-scrollbar-track { background:transparent; }
-      ::-webkit-scrollbar-thumb { background:rgba(0,229,204,0.14); border-radius:3px; }
-
-      @media(max-width:768px) {
-        .hide-mobile       { display:none !important; }
-        .show-mobile-only  { display:block !important; }
-        .lat-layout        { flex-direction:column !important; }
-        .perm-grid         { grid-template-columns:1fr !important; }
-        .sec-cards         { grid-template-columns:1fr !important; }
-        .arch-row          { flex-direction:column !important; align-items:center !important; }
-      }
-      @media(min-width:769px) {
-        .show-mobile-only { display:none !important; }
-      }
-
-      @keyframes dropdown-in {
-        from { opacity:0; transform:translateY(-6px); }
-        to   { opacity:1; transform:translateY(0);    }
-      }
     `}</style>
   );
 }
@@ -205,200 +264,347 @@ function SectionLabel({ num, text, color }: { num: string; text: string; color: 
   );
 }
 
-/* ─────────────────────────────────────────
-   HEADER  (exact clone from app/page.tsx)
-───────────────────────────────────────── */
-function Header({ isSubscribed, setIsSubscribed }: {
+/* ═══════════════════════════════════════
+   HEADER — copied EXACTLY word-for-word from app/page.tsx
+   Single modification: "How It Works" link colour = COLORS.accent (active state)
+   ═══════════════════════════════════════ */
+function Header({
+  isSubscribed,
+  setIsSubscribed,
+}: {
   isSubscribed: boolean;
   setIsSubscribed: (v: boolean) => void;
-}) {
-  const [scrolled,    setScrolled]    = useState(false);
-  const [mobileOpen,  setMobileOpen]  = useState(false);
-  const [socialsOpen, setSocialsOpen] = useState(false);
-  const socialsRef = useRef<HTMLDivElement>(null);
+}): React.JSX.Element {
+  const [scrolled, setScrolled]       = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen]   = useState<boolean>(false);
+  const [socialsOpen, setSocialsOpen] = useState<boolean>(false);
+  const socialsRef                    = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", h);
-    return () => window.removeEventListener("scroll", h);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Close socials dropdown when clicking outside */
   useEffect(() => {
-    const h = (e: MouseEvent) => {
-      if (socialsRef.current && !socialsRef.current.contains(e.target as Node))
+    const handler = (e: MouseEvent) => {
+      if (socialsRef.current && !socialsRef.current.contains(e.target as Node)) {
         setSocialsOpen(false);
+      }
     };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const navLinks = ["The Bot", "Whales", "Pricing", "How It Works"];
 
-  const getLinkHref = (l: string) => {
-    if (l === "The Bot")      return "/#the-bot";
-    if (l === "Whales")       return "/whales";
-    if (l === "Pricing")      return "/pricing";
-    if (l === "How It Works") return "/how-it-works";
+  const getLinkHref = (label: string): string => {
+    if (label === "The Bot")      return "/#the-bot";
+    if (label === "Whales")       return "/whales";
+    if (label === "Pricing")      return "/pricing";
+    if (label === "How It Works") return "/how-it-works";
     return "#";
   };
 
   const socialsLinks = [
-    { label:"Discord",  icon:"💬", href:"#" },
-    { label:"Telegram", icon:"✈️", href:"#" },
-    { label:"X",        icon:"𝕏",  href:"#" },
+    { label: "Discord",  href: "#", icon: "💬" },
+    { label: "Telegram", href: "#", icon: "✈️" },
+    { label: "X",        href: "#", icon: "𝕏" },
   ];
 
-  const lStyle: React.CSSProperties = {
-    textDecoration:"none", fontSize:13, fontWeight:700,
-    letterSpacing:"-0.01em", transition:"color 0.2s", whiteSpace:"nowrap",
-    fontFamily:"Syne, sans-serif",
+  /* Shared link style — identical to home page */
+  const linkStyle: React.CSSProperties = {
+    color: "#e2e8f0",
+    textDecoration: "none",
+    fontSize: 14,
+    fontWeight: 700,
+    letterSpacing: "0.01em",
+    transition: "color 0.2s",
+    whiteSpace: "nowrap",
   };
 
   return (
-    <header className="glass font-syne" style={{
-      position:"sticky", top:0, zIndex:100,
-      padding: scrolled ? "11px 0" : "17px 0",
-      borderBottom:`1px solid ${scrolled ? "rgba(0,229,204,0.08)" : "transparent"}`,
-      transition:"all 0.3s ease",
-    }}>
-      <div style={{
-        maxWidth:1160, margin:"0 auto", padding:"0 24px",
-        display:"flex", alignItems:"center", justifyContent:"space-between",
-      }}>
+    <header
+      className="glass font-display"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        padding: scrolled ? "12px 0" : "16px 0",
+        borderBottom: `1px solid ${scrolled ? "rgba(0,229,204,0.1)" : "rgba(0,229,204,0.06)"}`,
+        transition: "all 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         {/* Logo */}
-        <a href="/" style={{ display:"flex", alignItems:"center", gap:10, textDecoration:"none" }}>
-          <div style={{
-            width:34, height:34, borderRadius:9,
-            background:"linear-gradient(135deg,#00e5cc,#7c5cfc)",
-            display:"flex", alignItems:"center", justifyContent:"center",
-          }}>
-            <Waves size={18} color="#060b18" strokeWidth={2.5}/>
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #00e5cc, #7c5cfc)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Waves size={20} color="#060b18" strokeWidth={2.5} />
           </div>
-          <span style={{ fontSize:21, fontWeight:800, letterSpacing:"-0.03em", color:"#fff" }}>
-            Poly<span style={{ color:C.accent }}>Whale</span>
+          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff" }}>
+            Poly<span style={{ color: COLORS.accent }}>Whale</span>
           </span>
         </a>
 
-        {/* Desktop nav */}
-        <nav className="hide-mobile" style={{ display:"flex", alignItems:"center", gap:26 }}>
-          {navLinks.map(l => (
-            <a key={l} href={getLinkHref(l)}
-              style={{ ...lStyle, color: l === "How It Works" ? C.accent : C.textMuted }}
-              onMouseEnter={e => (e.currentTarget as HTMLAnchorElement).style.color = C.accent}
-              onMouseLeave={e => (e.currentTarget as HTMLAnchorElement).style.color = l === "How It Works" ? C.accent : C.textMuted}
-            >{l}</a>
+        {/* ── Desktop nav ── */}
+        <nav className="hide-mobile" style={{ display: "flex", alignItems: "center", gap: 28 }}>
+
+          {/* Main links — "How It Works" is highlighted as the active page */}
+          {navLinks.map((l) => (
+            <a
+              key={l}
+              href={getLinkHref(l)}
+              style={{
+                ...linkStyle,
+                color: l === "How It Works" ? COLORS.accent : "#e2e8f0",
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = COLORS.accent)}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = l === "How It Works" ? COLORS.accent : "#e2e8f0")}
+            >
+              {l}
+            </a>
           ))}
 
           {/* Socials dropdown */}
-          <div ref={socialsRef} style={{ position:"relative" }}>
-            <button onClick={() => setSocialsOpen(!socialsOpen)} style={{
-              ...lStyle, background:"none", border:"none", cursor:"pointer",
-              display:"inline-flex", alignItems:"center", gap:4, padding:0,
-              color: socialsOpen ? C.accent : C.textMuted,
-            }}
-              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = C.accent}
-              onMouseLeave={e => { if (!socialsOpen) (e.currentTarget as HTMLButtonElement).style.color = C.textMuted; }}
+          <div ref={socialsRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setSocialsOpen(!socialsOpen)}
+              style={{
+                ...linkStyle,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "Syne, sans-serif",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: 0,
+                color: socialsOpen ? COLORS.accent : "#e2e8f0",
+              }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = COLORS.accent)}
+              onMouseLeave={(e) => {
+                if (!socialsOpen) (e.currentTarget as HTMLButtonElement).style.color = "#e2e8f0";
+              }}
             >
               Socials
-              <ChevronRight size={12} style={{
-                transform: socialsOpen ? "rotate(90deg)" : "rotate(0deg)",
-                transition:"transform 0.22s",
-              }}/>
+              <ChevronRight
+                size={13}
+                style={{
+                  transform: socialsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              />
             </button>
+
+            {/* Glassmorphism dropdown panel */}
             {socialsOpen && (
-              <div style={{
-                position:"absolute", top:"calc(100% + 10px)", right:0,
-                minWidth:162, borderRadius:13,
-                background:"rgba(7,13,28,0.97)",
-                backdropFilter:"blur(24px)",
-                WebkitBackdropFilter:"blur(24px)",
-                border:"1px solid rgba(0,229,204,0.10)",
-                boxShadow:"0 20px 56px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02)",
-                padding:"6px", animation:"dropdown-in 0.16s ease both", zIndex:200,
-              }}>
-                {socialsLinks.map(({ label, icon, href }) => (
-                  <a key={label} href={href} onClick={() => setSocialsOpen(false)} style={{
-                    display:"flex", alignItems:"center", gap:10,
-                    padding:"10px 13px", borderRadius:8, textDecoration:"none",
-                    color:C.text, fontSize:13, fontWeight:500,
-                    fontFamily:"DM Sans, sans-serif", transition:"background 0.15s, color 0.15s",
-                  }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background="rgba(0,229,204,0.06)"; (e.currentTarget as HTMLAnchorElement).style.color=C.accent; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background="transparent"; (e.currentTarget as HTMLAnchorElement).style.color=C.text; }}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 12px)",
+                  right: 0,
+                  minWidth: 160,
+                  borderRadius: 12,
+                  background: "rgba(10,16,36,0.96)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: "1px solid rgba(0,229,204,0.12)",
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,204,0.04)",
+                  padding: "6px",
+                  animation: "fade-in-up 0.15s ease both",
+                }}
+              >
+                {socialsLinks.map(({ label, href, icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={() => setSocialsOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 14px",
+                      borderRadius: 8,
+                      textDecoration: "none",
+                      color: COLORS.textPrimary,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      fontFamily: "DM Sans, sans-serif",
+                      transition: "background 0.15s, color 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      const t = e.currentTarget as HTMLAnchorElement;
+                      t.style.background = "rgba(0,229,204,0.07)";
+                      t.style.color = COLORS.accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      const t = e.currentTarget as HTMLAnchorElement;
+                      t.style.background = "transparent";
+                      t.style.color = COLORS.textPrimary;
+                    }}
                   >
-                    <span style={{ fontSize:14 }}>{icon}</span>{label}
+                    <span style={{ fontSize: 15, lineHeight: 1 }}>{icon}</span>
+                    {label}
                   </a>
                 ))}
               </div>
             )}
           </div>
 
-          {/* PRO / Free Tier toggle */}
-          <button onClick={() => setIsSubscribed(!isSubscribed)} style={{
-            display:"inline-flex", alignItems:"center", gap:7,
-            padding:"7px 14px", borderRadius:8,
-            border:`1px solid ${isSubscribed ? "rgba(0,229,204,0.22)" : "rgba(124,92,252,0.22)"}`,
-            background: isSubscribed ? "rgba(0,229,204,0.06)" : "rgba(124,92,252,0.06)",
-            color: isSubscribed ? C.accent : C.accentAlt,
-            fontSize:11, fontWeight:700, cursor:"pointer",
-            fontFamily:"DM Sans, sans-serif", whiteSpace:"nowrap", transition:"all 0.3s ease",
-          }}>
-            {isSubscribed ? <Eye size={12}/> : <EyeOff size={12}/>}
+          {/* PRO Active / Free Tier developer toggle */}
+          <button
+            onClick={() => setIsSubscribed(!isSubscribed)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              borderRadius: 8,
+              border: `1px solid ${isSubscribed ? "rgba(0,229,204,0.3)" : "rgba(124,92,252,0.3)"}`,
+              background: isSubscribed ? "rgba(0,229,204,0.08)" : "rgba(124,92,252,0.08)",
+              color: isSubscribed ? COLORS.accent : COLORS.accentAlt,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "DM Sans, sans-serif",
+              whiteSpace: "nowrap",
+              transition: "all 0.3s ease",
+            }}
+          >
+            {isSubscribed ? <Eye size={14} /> : <EyeOff size={14} />}
             {isSubscribed ? "PRO Active" : "Free Tier"}
-            <div style={{
-              width:28, height:16, borderRadius:8,
-              background: isSubscribed ? "rgba(0,229,204,0.28)" : "rgba(255,255,255,0.07)",
-              position:"relative", transition:"background 0.3s",
-            }}>
-              <div style={{
-                width:12, height:12, borderRadius:"50%",
-                background: isSubscribed ? C.accent : C.textDim,
-                position:"absolute", top:2, left: isSubscribed ? 14 : 2,
-                transition:"all 0.3s cubic-bezier(.16,1,.3,1)",
-                boxShadow: isSubscribed ? "0 0 8px rgba(0,229,204,0.5)" : "none",
-              }}/>
+            <div
+              style={{
+                width: 32,
+                height: 18,
+                borderRadius: 9,
+                background: isSubscribed ? "rgba(0,229,204,0.3)" : "rgba(255,255,255,0.1)",
+                position: "relative",
+                transition: "background 0.3s ease",
+              }}
+            >
+              <div
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: "50%",
+                  background: isSubscribed ? COLORS.accent : COLORS.textSecondary,
+                  position: "absolute",
+                  top: 2,
+                  left: isSubscribed ? 16 : 2,
+                  transition: "all 0.3s cubic-bezier(0.16,1,0.3,1)",
+                  boxShadow: isSubscribed ? "0 0 8px rgba(0,229,204,0.5)" : "none",
+                }}
+              />
             </div>
           </button>
         </nav>
 
         {/* Mobile hamburger */}
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="show-mobile-only"
-          style={{ background:"none", border:"none", color:"#fff", cursor:"pointer" }}>
-          {mobileOpen ? <X size={24}/> : <Menu size={24}/>}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="show-mobile-only"
+          style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}
+        >
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* ── Mobile menu ── */}
       {mobileOpen && (
-        <div className="show-mobile-only" style={{
-          padding:"16px 24px", display:"flex", flexDirection:"column", gap:4,
-        }}>
-          {navLinks.map(l => (
-            <a key={l} href={getLinkHref(l)} onClick={() => setMobileOpen(false)} style={{
-              color: l === "How It Works" ? C.accent : C.textMuted,
-              textDecoration:"none", fontSize:15, fontWeight:600,
-              padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.04)",
-            }}>{l}</a>
+        <div
+          className="show-mobile-only"
+          style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: 4 }}
+        >
+          {/* Main links */}
+          {navLinks.map((l) => (
+            <a
+              key={l}
+              href={getLinkHref(l)}
+              onClick={() => setMobileOpen(false)}
+              style={{
+                color: l === "How It Works" ? COLORS.accent : "#e2e8f0",
+                textDecoration: "none",
+                fontSize: 15,
+                fontWeight: 700,
+                padding: "10px 0",
+                borderBottom: "1px solid rgba(255,255,255,0.04)",
+              }}
+            >
+              {l}
+            </a>
           ))}
-          <div style={{ padding:"10px 0", borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
-            <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.08em", color:C.textDim, textTransform:"uppercase", marginBottom:10 }}>Socials</div>
-            {socialsLinks.map(({ label, href }) => (
-              <a key={label} href={href} onClick={() => setMobileOpen(false)} style={{
-                display:"block", padding:"8px 0", textDecoration:"none", color:C.textMuted, fontSize:14,
-              }}>{label}</a>
+
+          {/* Socials — expanded inline in mobile */}
+          <div style={{ padding: "10px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", color: COLORS.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>
+              Socials
+            </div>
+            {socialsLinks.map(({ label, href, icon }) => (
+              <a
+                key={label}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 0",
+                  textDecoration: "none",
+                  color: COLORS.textSecondary,
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                <span>{icon}</span> {label}
+              </a>
             ))}
           </div>
-          <div style={{ paddingTop:12 }}>
-            <button onClick={() => { setIsSubscribed(!isSubscribed); setMobileOpen(false); }} style={{
-              width:"100%", padding:"12px 16px", borderRadius:10,
-              border:`1px solid ${isSubscribed ? "rgba(0,229,204,0.22)" : "rgba(124,92,252,0.22)"}`,
-              background: isSubscribed ? "rgba(0,229,204,0.06)" : "rgba(124,92,252,0.06)",
-              color: isSubscribed ? C.accent : C.accentAlt,
-              fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"DM Sans, sans-serif",
-              display:"flex", alignItems:"center", gap:8,
-            }}>
-              {isSubscribed ? <Eye size={14}/> : <EyeOff size={14}/>}
-              {isSubscribed ? "PRO Active" : "Free Tier"}
+
+          {/* PRO toggle */}
+          <div style={{ paddingTop: 12 }}>
+            <button
+              onClick={() => { setIsSubscribed(!isSubscribed); setMobileOpen(false); }}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                borderRadius: 10,
+                border: `1px solid ${isSubscribed ? "rgba(0,229,204,0.3)" : "rgba(124,92,252,0.3)"}`,
+                background: isSubscribed ? "rgba(0,229,204,0.08)" : "rgba(124,92,252,0.08)",
+                color: isSubscribed ? COLORS.accent : COLORS.accentAlt,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "DM Sans, sans-serif",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {isSubscribed ? <Eye size={16} /> : <EyeOff size={16} />}
+              {isSubscribed ? "PRO Active — Click to disable" : "Free Tier — Click to upgrade"}
             </button>
           </div>
         </div>
@@ -408,7 +614,7 @@ function Header({ isSubscribed, setIsSubscribed }: {
 }
 
 /* ─────────────────────────────────────────
-   EXECUTION TERMINAL
+   EXECUTION TERMINAL — untouched
 ───────────────────────────────────────── */
 type LogLine = {
   id: number;
@@ -466,7 +672,7 @@ function kindPrefix(k: LogLine["kind"]): string {
 }
 
 function ExecutionTerminal() {
-  const [lines, setLines] = useState<LogLine[]>([]);
+  const [lines, setLines]     = useState<LogLine[]>([]);
   const [cursorOn, setCursorOn] = useState(true);
   const poolIdx  = useRef(0);
   const nextId   = useRef(0);
@@ -575,7 +781,7 @@ function ExecutionTerminal() {
 }
 
 /* ─────────────────────────────────────────
-   HERO
+   HERO — untouched
 ───────────────────────────────────────── */
 function Hero() {
   return (
@@ -657,7 +863,7 @@ function Hero() {
 }
 
 /* ─────────────────────────────────────────
-   SECTION 1 — Latency Terminal
+   SECTION 1 — Latency Terminal — untouched
 ───────────────────────────────────────── */
 function LatencySection() {
   const ref = useReveal();
@@ -846,46 +1052,40 @@ function LatencySection() {
 }
 
 /* ─────────────────────────────────────────
-   ARCHITECTURE TOPOLOGY MAP — Section 2
-   Animated gradient packets flow L→C then C→R
+   ARCHITECTURE TOPOLOGY MAP — untouched
 ───────────────────────────────────────── */
-
 function easeInOut(t: number) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
 function ArchTopologyMap() {
-  const svgRef    = useRef<SVGSVGElement>(null);
-  // Packet A: Whale Wallets → Engine
-  const pktADot   = useRef<SVGCircleElement>(null);
-  const pktAGlow  = useRef<SVGCircleElement>(null);
-  // Packet B: Engine → User Portfolio (offset by half cycle)
-  const pktBDot   = useRef<SVGCircleElement>(null);
-  const pktBGlow  = useRef<SVGCircleElement>(null);
-  const rafId     = useRef(0);
+  const svgRef   = useRef<SVGSVGElement>(null);
+  const pktADot  = useRef<SVGCircleElement>(null);
+  const pktAGlow = useRef<SVGCircleElement>(null);
+  const pktBDot  = useRef<SVGCircleElement>(null);
+  const pktBGlow = useRef<SVGCircleElement>(null);
+  const rafId    = useRef(0);
 
   useEffect(() => {
-    const PERIOD = 1500; // ms per one-way trip
+    const PERIOD = 1500;
     let t0: number | null = null;
 
     const frame = (ts: number) => {
       if (!svgRef.current) { rafId.current = requestAnimationFrame(frame); return; }
       if (!t0) t0 = ts;
 
-      const W   = svgRef.current.clientWidth  || 900;
-      const H   = svgRef.current.clientHeight || 200;
+      const W    = svgRef.current.clientWidth  || 900;
+      const H    = svgRef.current.clientHeight || 200;
       const yMid = H / 2;
 
-      const xL = W * 0.118;  // left node center
-      const xC = W * 0.500;  // center node center
-      const xR = W * 0.882;  // right node center
+      const xL = W * 0.118;
+      const xC = W * 0.500;
+      const xR = W * 0.882;
 
-      // Packet A: L → C
       const tA  = ((ts - t0) % PERIOD) / PERIOD;
       const xA  = xL + (xC - xL) * easeInOut(tA);
       const opA = tA < 0.07 ? tA / 0.07 : tA > 0.93 ? (1 - tA) / 0.07 : 1;
 
-      // Packet B: C → R  (offset 50%)
       const tB  = ((ts - t0 + PERIOD * 0.51) % PERIOD) / PERIOD;
       const xB  = xC + (xR - xC) * easeInOut(tB);
       const opB = tB < 0.07 ? tB / 0.07 : tB > 0.93 ? (1 - tB) / 0.07 : 1;
@@ -912,7 +1112,6 @@ function ArchTopologyMap() {
 
   return (
     <div style={{ position:"relative" }}>
-
       {/* SVG layer — sits between boxes via absolute positioning */}
       <svg
         ref={svgRef}
@@ -969,7 +1168,6 @@ function ArchTopologyMap() {
         display:"flex", alignItems:"center",
         gap:0, position:"relative", zIndex:1,
       }}>
-
         {/* LEFT — Whale Wallets */}
         <ArchSideNode
           icon={<Users size={20}/>}
@@ -1003,9 +1201,9 @@ function ArchTopologyMap() {
         display:"flex", justifyContent:"center", gap:28, marginTop:44, flexWrap:"wrap",
       }}>
         {[
-          { label:"Signal ingest",    color:C.accent    },
-          { label:"Engine processing",color:C.accentAlt },
-          { label:"Order placement",  color:C.accentPink},
+          { label:"Signal ingest",     color:C.accent    },
+          { label:"Engine processing", color:C.accentAlt },
+          { label:"Order placement",   color:C.accentPink},
         ].map((l, i) => (
           <div key={i} style={{ display:"flex", alignItems:"center", gap:8 }}>
             <div style={{ width:22, height:2, borderRadius:1, background:l.color, opacity:0.55 }}/>
@@ -1174,7 +1372,7 @@ function MirroringSection() {
 }
 
 /* ─────────────────────────────────────────
-   SECTION 3 — Enterprise Security
+   SECTION 3 — Enterprise Security — untouched
 ───────────────────────────────────────── */
 function SecuritySection() {
   const ref = useReveal();
@@ -1365,7 +1563,7 @@ function SecuritySection() {
 }
 
 /* ─────────────────────────────────────────
-   FINAL CTA
+   FINAL CTA — untouched
 ───────────────────────────────────────── */
 function FinalCTA() {
   const ref = useReveal();
@@ -1443,20 +1641,22 @@ function FinalCTA() {
   );
 }
 
-/* ─────────────────────────────────────────
+/* ═══════════════════════════════════════
    ROOT PAGE
-───────────────────────────────────────── */
+   <GlobalStyles /> rendered at the very top of the return,
+   exactly as required — this is what loads the fonts and .glass class.
+   ═══════════════════════════════════════ */
 export default function HowItWorksPage() {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   return (
-    <div style={{ background:C.bg, minHeight:"100vh" }}>
-      <GlobalStyles/>
+    <div style={{ background: COLORS.bg, minHeight: "100vh" }}>
+      <GlobalStyles />
       <div className="grid-bg" style={{ position:"fixed", inset:0, opacity:0.25, pointerEvents:"none" }}/>
 
       <Header isSubscribed={isSubscribed} setIsSubscribed={setIsSubscribed}/>
 
-      <main style={{ position:"relative" }}>
+      <main style={{ position:"relative", paddingTop: 80 }}>
         <Hero/>
         <LatencySection/>
         <MirroringSection/>
