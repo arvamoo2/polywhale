@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Menu,
   X,
+  ChevronRight,
 } from "lucide-react";
 
 /* ─── palette (matches homepage exactly) ─── */
@@ -292,11 +293,24 @@ function Header({
 }): React.JSX.Element {
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [socialsOpen, setSocialsOpen] = useState<boolean>(false);
+  const socialsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* Close socials dropdown when clicking outside */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (socialsRef.current && !socialsRef.current.contains(e.target as Node)) {
+        setSocialsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const getLinkHref = (label: string): string => {
@@ -308,6 +322,12 @@ function Header({
   };
 
   const navLinks = ["The Bot", "Whales", "Pricing", "How It Works"];
+
+  const socialsLinks = [
+    { label: "Discord",  href: "#", icon: "💬" },
+    { label: "Telegram", href: "#", icon: "✈️" },
+    { label: "X",        href: "#", icon: "𝕏" },
+  ];
 
   return (
     <header
@@ -382,6 +402,98 @@ function Header({
               {l}
             </a>
           ))}
+
+          {/* Socials dropdown */}
+          <div ref={socialsRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setSocialsOpen(!socialsOpen)}
+              style={{
+                color: socialsOpen ? COLORS.accent : "#e2e8f0",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: "0.01em",
+                fontFamily: "Syne, sans-serif",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: 0,
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.color = COLORS.accent)
+              }
+              onMouseLeave={(e) => {
+                if (!socialsOpen)
+                  (e.currentTarget as HTMLButtonElement).style.color = "#e2e8f0";
+              }}
+            >
+              Socials
+              <ChevronRight
+                size={13}
+                style={{
+                  transform: socialsOpen ? "rotate(90deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              />
+            </button>
+
+            {socialsOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 12px)",
+                  right: 0,
+                  minWidth: 160,
+                  borderRadius: 12,
+                  background: "rgba(10,16,36,0.96)",
+                  backdropFilter: "blur(20px)",
+                  WebkitBackdropFilter: "blur(20px)",
+                  border: "1px solid rgba(0,229,204,0.12)",
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,204,0.04)",
+                  padding: "6px",
+                  animation: "fade-in-up 0.15s ease both",
+                  zIndex: 200,
+                }}
+              >
+                {socialsLinks.map(({ label, href, icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    onClick={() => setSocialsOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 14px",
+                      borderRadius: 8,
+                      textDecoration: "none",
+                      color: COLORS.textPrimary,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      fontFamily: "DM Sans, sans-serif",
+                      transition: "background 0.15s, color 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      const t = e.currentTarget as HTMLAnchorElement;
+                      t.style.background = "rgba(0,229,204,0.07)";
+                      t.style.color = COLORS.accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      const t = e.currentTarget as HTMLAnchorElement;
+                      t.style.background = "transparent";
+                      t.style.color = COLORS.textPrimary;
+                    }}
+                  >
+                    <span style={{ fontSize: 15, lineHeight: "1" }}>{icon}</span>
+                    {label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* PRO toggle */}
           <button
@@ -463,6 +575,41 @@ function Header({
               {l}
             </a>
           ))}
+
+          {/* Socials — expanded inline in mobile */}
+          <div style={{ paddingTop: 4 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                color: COLORS.textSecondary,
+                textTransform: "uppercase",
+                marginBottom: 10,
+              }}
+            >
+              Socials
+            </div>
+            {socialsLinks.map(({ label, href, icon }) => (
+              <a
+                key={label}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 0",
+                  textDecoration: "none",
+                  color: COLORS.textSecondary,
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                <span>{icon}</span> {label}
+              </a>
+            ))}
+          </div>
           <button
             onClick={() => { setIsSubscribed(!isSubscribed); setMobileOpen(false); }}
             style={{
