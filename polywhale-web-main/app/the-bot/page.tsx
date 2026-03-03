@@ -162,6 +162,10 @@ function GlobalStyles(): React.JSX.Element {
         0%, 100% { box-shadow: 0 0 6px rgba(0,229,204,0.2); }
         50% { box-shadow: 0 0 20px rgba(0,229,204,0.6), 0 0 40px rgba(0,229,204,0.15); }
       }
+      @keyframes execute-pulse {
+        0%, 100% { box-shadow: 0 0 8px rgba(0,229,204,0.5); transform: scale(1); }
+        50% { box-shadow: 0 0 22px rgba(0,229,204,0.9), 0 0 44px rgba(0,229,204,0.3); transform: scale(1.04); }
+      }
       @keyframes feed-row-in {
         from { opacity: 0; transform: translateX(-16px); }
         to   { opacity: 1; transform: translateX(0); }
@@ -1021,11 +1025,12 @@ function CoreFeatures(): React.JSX.Element {
 }
 
 /* ── Card wrapper with shared hover behavior ── */
+/* ── Card wrapper — render-prop pattern so children can read hovered state ── */
 function FeatureCard({
   children,
   color,
 }: {
-  children: React.ReactNode;
+  children: (hovered: boolean) => React.ReactNode;
   color: string;
 }): React.JSX.Element {
   const [hovered, setHovered] = useState(false);
@@ -1034,69 +1039,125 @@ function FeatureCard({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        padding: "32px 28px", borderRadius: 18,
-        background: hovered ? `${color}04` : "rgba(6,10,24,0.85)",
-        border: `1px solid ${hovered ? `${color}20` : "rgba(255,255,255,0.04)"}`,
+        padding: "32px 28px",
+        borderRadius: 18,
+        background: hovered ? `${color}05` : "rgba(6,10,24,0.85)",
+        border: `1px solid ${hovered ? `rgba(0,229,204,0.22)` : "rgba(255,255,255,0.04)"}`,
         boxShadow: hovered
-          ? `0 0 48px ${color}0a, inset 0 1px 0 rgba(255,255,255,0.04)`
+          ? `0 0 48px rgba(0,229,204,0.07), 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)`
           : "inset 0 1px 0 rgba(255,255,255,0.02)",
         transition: "all 0.4s cubic-bezier(0.16,1,0.3,1)",
-        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        transform: hovered ? "translateY(-4px)" : "translateY(0)",
       }}
     >
-      {children}
+      {children(hovered)}
+    </div>
+  );
+}
+
+/* ── Shared glassmorphism icon container ── */
+function CardIcon({
+  icon,
+  color,
+  hovered,
+}: {
+  icon: React.ReactNode;
+  color: string;
+  hovered: boolean;
+}): React.JSX.Element {
+  return (
+    <div
+      style={{
+        width: 48,
+        height: 48,
+        borderRadius: "50%",
+        background: hovered
+          ? `rgba(${color === COLORS.accent ? "0,229,204" : color === COLORS.accentAlt ? "124,92,252" : "244,114,182"},0.14)`
+          : `rgba(${color === COLORS.accent ? "0,229,204" : color === COLORS.accentAlt ? "124,92,252" : "244,114,182"},0.07)`,
+        border: `1px solid ${hovered ? `${color}40` : `${color}18`}`,
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        boxShadow: hovered ? `0 0 24px ${color}30, inset 0 1px 0 rgba(255,255,255,0.08)` : "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: color,
+        marginBottom: 22,
+        transition: "all 0.35s cubic-bezier(0.16,1,0.3,1)",
+        flexShrink: 0,
+      }}
+    >
+      {icon}
     </div>
   );
 }
 
 /* ── 1. Auto-Rebalancing ── */
 function RebalanceCard(): React.JSX.Element {
-  const allocs = [
+  const allocsIdle    = [
     { label: "Politics", pct: 42, color: COLORS.accent },
-    { label: "Crypto", pct: 28, color: COLORS.accentAlt },
-    { label: "Sports", pct: 18, color: COLORS.accentPink },
-    { label: "Other", pct: 12, color: "#fbbf24" },
+    { label: "Crypto",   pct: 28, color: COLORS.accentAlt },
+    { label: "Sports",   pct: 18, color: COLORS.accentPink },
+    { label: "Other",    pct: 12, color: "#fbbf24" },
+  ];
+  const allocsHovered = [
+    { label: "Politics", pct: 35, color: COLORS.accent },
+    { label: "Crypto",   pct: 35, color: COLORS.accentAlt },
+    { label: "Sports",   pct: 20, color: COLORS.accentPink },
+    { label: "Other",    pct: 10, color: "#fbbf24" },
   ];
 
   return (
     <FeatureCard color={COLORS.accent}>
-      <div style={{
-        width: 46, height: 46, borderRadius: 13,
-        background: `${COLORS.accent}0d`, border: `1px solid ${COLORS.accent}18`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: COLORS.accent, marginBottom: 22,
-      }}>
-        <RefreshCw size={21} />
-      </div>
+      {(hovered) => {
+        const allocs = hovered ? allocsHovered : allocsIdle;
+        return (
+          <>
+            <CardIcon icon={<RefreshCw size={20} />} color={COLORS.accent} hovered={hovered} />
 
-      <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
-        Auto-Rebalancing
-      </h3>
-      <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
-        Dynamically reallocates your portfolio across market categories
-        based on whale activity concentration and your risk limits.
-      </p>
+            <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
+              Auto-Rebalancing
+            </h3>
+            <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
+              Dynamically reallocates your portfolio across market categories
+              based on whale activity concentration and your risk limits.
+            </p>
 
-      {/* Stacked allocation bar */}
-      <div style={{ borderRadius: 6, overflow: "hidden", height: 8, display: "flex", marginBottom: 12 }}>
-        {allocs.map((a, i) => (
-          <div key={i} style={{ width: `${a.pct}%`, height: "100%", background: a.color, transition: "width 0.5s ease" }} />
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-        {allocs.map((a, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <div style={{ width: 6, height: 6, borderRadius: 2, background: a.color }} />
-            <span className="font-mono" style={{ fontSize: 9, color: COLORS.textSecondary }}>{a.label} {a.pct}%</span>
-          </div>
-        ))}
-      </div>
+            {/* Animated stacked allocation bar */}
+            <div style={{ borderRadius: 6, overflow: "hidden", height: 8, display: "flex", marginBottom: 12 }}>
+              {allocs.map((a, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: `${a.pct}%`,
+                    height: "100%",
+                    background: a.color,
+                    transition: "width 0.5s ease-in-out",
+                  }}
+                />
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              {allocs.map((a, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: 2, background: a.color, transition: "background 0.3s" }} />
+                  <span className="font-mono" style={{ fontSize: 9, color: COLORS.textSecondary, transition: "color 0.3s" }}>
+                    {a.label} {a.pct}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      }}
     </FeatureCard>
   );
 }
 
-/* ── 2. Slippage Protection — mini order book ── */
+/* ── 2. Slippage Protection — interactive order book ── */
 function SlippageCard(): React.JSX.Element {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
   const book = [
     { price: "0.67", size: "2,400", side: "ask", blocked: true },
     { price: "0.65", size: "1,800", side: "ask", blocked: true },
@@ -1107,142 +1168,188 @@ function SlippageCard(): React.JSX.Element {
 
   return (
     <FeatureCard color={COLORS.accentPink}>
-      <div style={{
-        width: 46, height: 46, borderRadius: 13,
-        background: `${COLORS.accentPink}0d`, border: `1px solid ${COLORS.accentPink}18`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: COLORS.accentPink, marginBottom: 22,
-      }}>
-        <ShieldAlert size={21} />
-      </div>
+      {(hovered) => (
+        <>
+          <CardIcon icon={<ShieldAlert size={20} />} color={COLORS.accentPink} hovered={hovered} />
 
-      <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
-        Slippage Protection
-      </h3>
-      <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
-        Orders exceeding your slippage threshold are automatically blocked
-        before execution. Hard ceiling at 1%.
-      </p>
+          <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
+            Slippage Protection
+          </h3>
+          <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
+            Orders exceeding your slippage threshold are automatically blocked
+            before execution. Hard ceiling at 1%.
+          </p>
 
-      {/* Mini order book */}
-      <div style={{
-        borderRadius: 10, overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.03)",
-        background: "rgba(0,0,0,0.25)",
-      }}>
-        {/* Header */}
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-          padding: "7px 14px", borderBottom: "1px solid rgba(255,255,255,0.03)",
-        }}>
-          {["Price", "Size", "Status"].map((h) => (
-            <span key={h} className="font-mono" style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              {h}
-            </span>
-          ))}
-        </div>
-        {/* Rows */}
-        {book.map((o, i) => (
-          <div
-            key={i}
-            style={{
-              display: "grid", gridTemplateColumns: "1fr 1fr 1fr", alignItems: "center",
-              padding: "6px 14px",
-              background: o.blocked ? "rgba(244,114,182,0.04)" : "transparent",
-              borderBottom: i < book.length - 1 ? "1px solid rgba(255,255,255,0.02)" : "none",
-            }}
-          >
-            <span className="font-mono" style={{
-              fontSize: 11, fontWeight: 600,
-              color: o.side === "ask" ? COLORS.accentPink : COLORS.accent,
-              opacity: o.blocked ? 0.5 : 1,
-            }}>{o.price}</span>
-            <span className="font-mono" style={{ fontSize: 11, color: COLORS.textSecondary, opacity: o.blocked ? 0.4 : 1 }}>{o.size}</span>
-            {o.blocked ? (
-              <span className="font-mono" style={{
-                fontSize: 8, color: COLORS.accentPink, fontWeight: 700, letterSpacing: "0.06em",
-                background: "rgba(244,114,182,0.1)", padding: "2px 6px", borderRadius: 3,
-                display: "inline-block", width: "fit-content",
-              }}>BLOCKED</span>
-            ) : (
-              <span className="font-mono" style={{ fontSize: 8, color: COLORS.accent, fontWeight: 700, letterSpacing: "0.06em" }}>OK</span>
-            )}
+          {/* Interactive order book */}
+          <div style={{
+            borderRadius: 10,
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.04)",
+            background: "rgba(0,0,0,0.3)",
+          }}>
+            {/* Header */}
+            <div style={{
+              display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+              padding: "8px 14px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              background: "rgba(255,255,255,0.015)",
+            }}>
+              {["Price", "Size", "Status"].map((h) => (
+                <span key={h} className="font-mono" style={{
+                  fontSize: 8, color: "rgba(255,255,255,0.3)",
+                  letterSpacing: "0.12em", textTransform: "uppercase",
+                }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            {/* Rows */}
+            {book.map((o, i) => (
+              <div
+                key={i}
+                onMouseEnter={() => setHoveredRow(i)}
+                onMouseLeave={() => setHoveredRow(null)}
+                style={{
+                  display: "grid", gridTemplateColumns: "1fr 1fr 1fr", alignItems: "center",
+                  padding: "7px 14px",
+                  background: hoveredRow === i
+                    ? "rgba(255,255,255,0.04)"
+                    : o.blocked
+                      ? "rgba(255,59,59,0.03)"
+                      : "transparent",
+                  borderBottom: i < book.length - 1 ? "1px solid rgba(255,255,255,0.025)" : "none",
+                  transition: "background 0.15s ease",
+                  cursor: "default",
+                }}
+              >
+                <span className="font-mono" style={{
+                  fontSize: 11, fontWeight: 600,
+                  color: o.side === "ask" ? "#ff6b6b" : COLORS.accent,
+                  opacity: o.blocked ? 0.45 : 1,
+                }}>
+                  {o.price}
+                </span>
+                <span className="font-mono" style={{
+                  fontSize: 11,
+                  color: COLORS.textSecondary,
+                  opacity: o.blocked ? 0.35 : 1,
+                }}>
+                  {o.size}
+                </span>
+                {o.blocked ? (
+                  <span className="font-mono" style={{
+                    fontSize: 8, fontWeight: 700, letterSpacing: "0.07em",
+                    color: "#ff3b3b",
+                    background: "rgba(255,59,59,0.10)",
+                    border: "1px solid rgba(255,59,59,0.20)",
+                    padding: "2px 7px", borderRadius: 4,
+                    display: "inline-block", width: "fit-content",
+                  }}>
+                    BLOCKED
+                  </span>
+                ) : (
+                  <span className="font-mono" style={{
+                    fontSize: 8, fontWeight: 700, letterSpacing: "0.07em",
+                    color: COLORS.accent,
+                    background: "rgba(0,229,204,0.08)",
+                    border: "1px solid rgba(0,229,204,0.18)",
+                    padding: "2px 7px", borderRadius: 4,
+                    display: "inline-block", width: "fit-content",
+                  }}>
+                    OK
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </FeatureCard>
   );
 }
 
-/* ── 3. Conviction Scoring — threshold meter ── */
+/* ── 3. Smart Conviction Scoring — live threshold ── */
 function ConvictionCard(): React.JSX.Element {
   const confidence = 94;
 
   return (
     <FeatureCard color={COLORS.accentAlt}>
-      <div style={{
-        width: 46, height: 46, borderRadius: 13,
-        background: `${COLORS.accentAlt}0d`, border: `1px solid ${COLORS.accentAlt}18`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        color: COLORS.accentAlt, marginBottom: 22,
-      }}>
-        <BrainCircuit size={21} />
-      </div>
+      {(hovered) => (
+        <>
+          <CardIcon icon={<BrainCircuit size={20} />} color={COLORS.accentAlt} hovered={hovered} />
 
-      <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
-        Smart Conviction Scoring
-      </h3>
-      <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
-        Each whale move is scored against historical accuracy, position size,
-        and market context before any capital is deployed.
-      </p>
+          <h3 className="font-display" style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.02em" }}>
+            Smart Conviction Scoring
+          </h3>
+          <p style={{ fontSize: 13, lineHeight: 1.75, color: COLORS.textSecondary, marginBottom: 22 }}>
+            Each whale move is scored against historical accuracy, position size,
+            and market context before any capital is deployed.
+          </p>
 
-      {/* Conviction threshold meter */}
-      <div style={{
-        padding: "16px 18px", borderRadius: 12,
-        background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.03)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
-          <span className="font-mono" style={{ fontSize: 10, color: COLORS.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-            Whale Confidence
-          </span>
-          <span className="font-mono" style={{ fontSize: 16, fontWeight: 700, color: COLORS.accent, letterSpacing: "-0.02em" }}>
-            {confidence}%
-          </span>
-        </div>
-
-        {/* Meter bar */}
-        <div style={{ position: "relative", height: 7, borderRadius: 4, background: "rgba(255,255,255,0.03)", overflow: "visible", marginBottom: 12 }}>
+          {/* Conviction threshold meter */}
           <div style={{
-            position: "absolute", top: 0, left: 0, height: "100%",
-            width: `${confidence}%`, borderRadius: 4,
-            background: `linear-gradient(90deg, ${COLORS.accentAlt}, ${COLORS.accent})`,
-            boxShadow: "0 0 16px rgba(0,229,204,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
-          }} />
-          {/* 70% threshold marker */}
-          <div style={{
-            position: "absolute", top: -4, left: "70%", width: 1.5, height: 15,
-            background: "rgba(255,255,255,0.15)", borderRadius: 1,
-          }} />
-        </div>
+            padding: "16px 18px", borderRadius: 12,
+            background: "rgba(0,0,0,0.28)", border: "1px solid rgba(255,255,255,0.04)",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+              <span className="font-mono" style={{ fontSize: 10, color: COLORS.textSecondary, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Whale Confidence
+              </span>
+              <span className="font-mono" style={{
+                fontSize: 16, fontWeight: 700, color: COLORS.accent, letterSpacing: "-0.02em",
+                transition: "opacity 0.4s ease",
+                opacity: hovered ? 1 : 0.5,
+              }}>
+                {hovered ? `${confidence}%` : "—"}
+              </span>
+            </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span className="font-mono" style={{ fontSize: 9, color: "rgba(255,255,255,0.18)" }}>
-            Threshold: 70%
-          </span>
-          <span
-            className="font-mono"
-            style={{
-              fontSize: 10, fontWeight: 700, color: "#060b18",
-              background: COLORS.accent, padding: "3px 10px", borderRadius: 4,
-              letterSpacing: "0.04em",
-              animation: "status-glow 2.5s ease-in-out infinite",
-            }}
-          >
-            EXECUTE
-          </span>
-        </div>
-      </div>
+            {/* Animated meter bar — fills on hover */}
+            <div style={{
+              position: "relative", height: 7, borderRadius: 4,
+              background: "rgba(255,255,255,0.04)",
+              overflow: "visible", marginBottom: 12,
+            }}>
+              <div style={{
+                position: "absolute", top: 0, left: 0, height: "100%",
+                width: hovered ? `${confidence}%` : "0%",
+                borderRadius: 4,
+                background: `linear-gradient(90deg, ${COLORS.accentAlt}, ${COLORS.accent})`,
+                boxShadow: hovered ? "0 0 16px rgba(0,229,204,0.35), inset 0 1px 0 rgba(255,255,255,0.15)" : "none",
+                transition: "width 0.7s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease",
+              }} />
+              {/* 70% threshold marker */}
+              <div style={{
+                position: "absolute", top: -4, left: "70%",
+                width: 1.5, height: 15,
+                background: "rgba(255,255,255,0.18)", borderRadius: 1,
+              }} />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="font-mono" style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>
+                Threshold: 70%
+              </span>
+              <span
+                className="font-mono"
+                style={{
+                  fontSize: 10, fontWeight: 700,
+                  color: "#060b18",
+                  background: COLORS.accent,
+                  padding: "3px 10px", borderRadius: 4,
+                  letterSpacing: "0.05em",
+                  display: "inline-block",
+                  animation: "execute-pulse 2s ease-in-out infinite",
+                  transformOrigin: "center",
+                }}
+              >
+                EXECUTE
+              </span>
+            </div>
+          </div>
+        </>
+      )}
     </FeatureCard>
   );
 }
