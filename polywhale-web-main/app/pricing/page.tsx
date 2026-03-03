@@ -174,9 +174,11 @@ function Header({
   }, []);
 
   const getLinkHref = (label: string): string => {
+    if (label === "The Bot")      return "/the-bot";
     if (label === "Home") return "/";
     if (label === "Whales") return "/whales";
     if (label === "Pricing") return "/pricing";
+    if (label === "How It Works") return "/how-it-works";
     return `#${label.toLowerCase().replace(/ /g, "-")}`;
   };
 
