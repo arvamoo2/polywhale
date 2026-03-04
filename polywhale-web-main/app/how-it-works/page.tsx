@@ -819,13 +819,13 @@ function Hero() {
           letterSpacing:"-0.04em", marginBottom:24, lineHeight:1.06,
           animation:"fade-up 0.5s ease 0.08s both",
         }}>
-          How{" "}<span style={{
+          See the Future.<br />
+          <span style={{
             background:"linear-gradient(135deg,#00e5cc 0%,#7c5cfc 100%)",
             WebkitBackgroundClip:"text",
             WebkitTextFillColor:"transparent",
             backgroundClip:"text",
-          }}>Sub-Second Execution</span>
-          <br />Wins Markets
+          }}>Execute in Milliseconds.</span>
         </h1>
 
         <p style={{
@@ -833,9 +833,7 @@ function Hero() {
           maxWidth:500, margin:"0 auto 52px",
           animation:"fade-up 0.5s ease 0.15s both",
         }}>
-          In prediction markets, information is only as valuable as the speed at
-          which you act on it. See exactly how PolyWhale delivers the structural
-          edge no human trader can replicate.
+          Information is useless if you can't act on it. See exactly how PolyWhale's high-frequency topology keeps you one step ahead of the crowd.
         </p>
 
         {/* The Execution Terminal */}
