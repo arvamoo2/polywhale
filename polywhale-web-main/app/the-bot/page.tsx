@@ -723,7 +723,7 @@ function HeroSection(): React.JSX.Element {
             animation: "fade-in-up 0.5s ease 0.05s both",
           }}
         >
-          Algorithmic Precision,<br />
+          Your Portfolio.<br />
           <span
             style={{
               background: "linear-gradient(135deg, #00e5cc, #7c5cfc)",
@@ -731,7 +731,7 @@ function HeroSection(): React.JSX.Element {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Complete User Control.
+            On Autopilot.
           </span>
         </h1>
 
@@ -740,8 +740,7 @@ function HeroSection(): React.JSX.Element {
           maxWidth: 540, margin: "0 auto 64px", textAlign: "center",
           animation: "fade-in-up 0.5s ease 0.1s both",
         }}>
-          Configure every parameter. Set your risk tolerance, choose your markets,
-          and let the algorithm execute with institutional precision.
+          Take the emotion out of trading. Configure your risk limits, select your markets, and let our deterministic engine execute your strategy 24/7.
         </p>
 
         {/* ─── Terminal Configuration Dashboard ─── */}
