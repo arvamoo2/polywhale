@@ -1267,7 +1267,7 @@ export default function PricingPage(): React.JSX.Element {
                 animation: "fade-in-up 0.5s ease 0.05s both",
               }}
             >
-              Choose Your{" "}
+              Stop Guessing.<br />
               <span
                 style={{
                   background: "linear-gradient(135deg, #00e5cc, #7c5cfc)",
@@ -1275,7 +1275,7 @@ export default function PricingPage(): React.JSX.Element {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Edge
+                Start Mirroring.
               </span>
             </h1>
 
@@ -1289,8 +1289,7 @@ export default function PricingPage(): React.JSX.Element {
                 animation: "fade-in-up 0.5s ease 0.1s both",
               }}
             >
-              From watching the leaderboard to mirroring every whale trade at machine
-              speed. Pick the plan that matches your ambition.
+              Whether you're scouting for signals or automating a six-figure portfolio, select the infrastructure tier built for your ambition.
             </p>
           </div>
         </section>
