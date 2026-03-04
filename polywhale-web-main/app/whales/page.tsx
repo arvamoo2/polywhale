@@ -1308,7 +1308,7 @@ export default function WhaleLeaderboard(): React.JSX.Element {
               marginBottom: 10,
             }}
           >
-            Whale{" "}
+            Track the 1%.<br />
             <span
               style={{
                 background: "linear-gradient(135deg, #00e5cc, #7c5cfc)",
@@ -1316,7 +1316,7 @@ export default function WhaleLeaderboard(): React.JSX.Element {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Leaderboard
+              Mirror the Elite.
             </span>
           </h1>
           <p
@@ -1327,8 +1327,7 @@ export default function WhaleLeaderboard(): React.JSX.Element {
               lineHeight: 1.6,
             }}
           >
-            The most profitable Polymarket wallets, ranked by performance. See who&apos;s
-            winning &mdash; and mirror their next move.
+            The definitive leaderboard of Polymarket&apos;s most profitable whales. Stop following the crowd and start copying the wallets that actually move the markets.
           </p>
         </div>
 
